@@ -32,7 +32,9 @@ public class Fonts {
 		}
 
 		if (font == null) {
-			font = FontFactory.create(activity.getFontManager(), activity.getTextureManager(), 256, 256, Typeface.create(Typeface.DEFAULT, Typeface.BOLD), fontSize, activity.getColor(colorResId).getARGBPackedInt());
+			final int textureWidth = (int) (10 * fontSize);
+			final int textureHeight = (int) Math.ceil(fontSize);
+			font = FontFactory.create(activity.getFontManager(), activity.getTextureManager(), textureWidth, textureHeight, Typeface.create(Typeface.DEFAULT, Typeface.BOLD), fontSize, activity.getColor(colorResId).getARGBPackedInt());
 			font.load();
 			fontsBySize.append(colorResId, font);
 		}

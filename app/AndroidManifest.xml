@@ -39,7 +39,7 @@
 			android:debuggable="true"
 			android:hardwareAccelerated="true">
 
-		<activity android:name=".GameActivity">
+		<activity android:name=".GameActivity" android:configChanges="orientation">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN"/>
 				<category android:name="android.intent.category.LAUNCHER"/>
