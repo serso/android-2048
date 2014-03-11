@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<color name="bg">#fffaf8ef</color>
+	<color name="board_bg">#ffbbada0</color>
+
+	<color name="cell_bg">#66eee4da</color>
+	<color name="cell_text">@color/cell_bg</color>
+
+	<color name="cell_bg_2">#ffeee4da</color>
+	<color name="cell_text_2">#776e65</color>
+
+	<color name="cell_bg_4">#ffede0c8</color>
+	<color name="cell_text_4">@color/cell_text_2</color>
+
+	<color name="cell_bg_8">#fff2b179</color>
+	<color name="cell_text_8">#fff9f6f2</color>
+
+	<color name="cell_bg_16">#fff59563</color>
+	<color name="cell_text_16">#fff9f6f2</color>
+
+	<color name="cell_bg_32">#fff67c5f</color>
+	<color name="cell_text_32">#fff9f6f2</color>
+
+	<color name="cell_bg_64">#fff65e3b</color>
+	<color name="cell_text_64">#fff9f6f2</color>
+
+	<color name="cell_bg_128">#ffedcf72</color>
+	<color name="cell_text_128">#fff9f6f2</color>
+
+	<color name="cell_bg_256">#ffedcc61</color>
+	<color name="cell_text_256">#fff9f6f2</color>
+
+	<color name="cell_bg_512">#ffedc850</color>
+	<color name="cell_text_512">#fff9f6f2</color>
+
+	<color name="cell_bg_1024">#ffedc53f</color>
+	<color name="cell_text_1024">#fff9f6f2</color>
+
+	<color name="cell_bg_2048">#ffedc22e</color>
+	<color name="cell_text_2048">#fff9f6f2</color>
+</resources>

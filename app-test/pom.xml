@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2013 serso aka se.solovyev
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.solovyev.android.game2048</groupId>
+		<artifactId>android-game2048</artifactId>
+		<version>0.01</version>
+	</parent>
+
+	<artifactId>android-game2048-app-test</artifactId>
+	<name>Android 2048 Game App (Test)</name>
+	<version>0.01</version>
+
+	<packaging>apk</packaging>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>org.solovyev.android.game2048</groupId>
+			<artifactId>android-game2048-app</artifactId>
+			<scope>provided</scope>
+			<type>apk</type>
+		</dependency>
+
+		<dependency>
+			<groupId>org.solovyev.android.game2048</groupId>
+			<artifactId>android-game2048-app</artifactId>
+			<scope>provided</scope>
+			<type>jar</type>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.android</groupId>
+			<artifactId>android</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.android</groupId>
+			<artifactId>android-test</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>annotations</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.dexmaker</groupId>
+			<artifactId>dexmaker</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.dexmaker</groupId>
+			<artifactId>dexmaker-mockito</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+
+		<extensions>
+			<extension>
+				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
+				<artifactId>android-maven-plugin</artifactId>
+			</extension>
+		</extensions>
+
+		<plugins>
+			<plugin>
+				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
+				<artifactId>android-maven-plugin</artifactId>
+				<configuration>
+					<test>
+						<skip>true</skip>
+					</test>
+				</configuration>
+				<extensions>true</extensions>
+			</plugin>
+		</plugins>
+
+	</build>
+
+	<profiles>
+		<profile>
+			<id>with-emulator</id>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.jayway.maven.plugins.android.generation2</groupId>
+						<artifactId>android-maven-plugin</artifactId>
+						<extensions>true</extensions>
+
+						<configuration>
+							<emulator>
+								<avd>Default</avd>
+								<wait>60000</wait>
+							</emulator>
+						</configuration>
+
+						<executions>
+							<execution>
+								<id>emulator-start</id>
+								<goals>
+									<goal>emulator-start</goal>
+								</goals>
+								<phase>initialize</phase>
+							</execution>
+
+							<execution>
+								<id>emulator-stop</id>
+								<goals>
+									<goal>emulator-stop</goal>
+								</goals>
+								<!--we want to close emulator after emma-->
+								<phase>verify</phase>
+								<!--<phase>post-integration-test</phase>-->
+							</execution>
+
+						</executions>
+
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>with-tests</id>
+
+			<dependencies>
+				<dependency>
+					<groupId>emma</groupId>
+					<artifactId>emma</artifactId>
+					<type>jar</type>
+					<scope>compile</scope>
+					<version>2.1.5320</version>
+				</dependency>
+			</dependencies>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.jayway.maven.plugins.android.generation2</groupId>
+						<artifactId>android-maven-plugin</artifactId>
+						<configuration>
+							<test>
+								<skip>false</skip>
+								<!-- Run test with flag "-w coverage true" this is need for generate coverage.ec file, result file-->
+								<coverage>true</coverage>
+								<createReport>true</createReport>
+							</test>
+						</configuration>
+						<extensions>true</extensions>
+
+						<executions>
+
+							<!-- need for pull coverage.ec file and move to tested project-->
+							<execution>
+								<id>pull-coverage</id>
+								<phase>post-integration-test</phase>
+								<goals>
+									<goal>pull</goal>
+								</goals>
+								<configuration>
+									<pullSource>/data/data/org.solovyev.android.game2048/files/coverage.ec</pullSource>
+									<pullDestination>core/target/emma/coverage.ec</pullDestination>
+								</configuration>
+							</execution>
+
+						</executions>
+
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+	</profiles>
+
+</project>
