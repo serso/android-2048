@@ -4,9 +4,13 @@ import android.app.Activity;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build;
+import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
@@ -18,6 +22,7 @@ import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
 import org.andengine.entity.util.FPSLogger;
+import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.font.Font;
 import org.andengine.opengl.font.FontUtils;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
@@ -62,16 +67,31 @@ public class GameActivity extends SimpleBaseGameActivity {
 	@Nonnull
 	private final Fonts fonts = new Fonts(this);
 
+	@Nonnull
+	private GestureDetector gestureDetector;
+
 	@Override
 	protected void onCreateResources() {
 		for (int i = 0; i < cellStyles.size(); i++) {
-			  cellStyles.valueAt(i).loadFont(this, d.cellTextSize);
+			cellStyles.valueAt(i).loadFont(this, d.cellTextSize);
 		}
 	}
 
 	@Nonnull
 	public Fonts getFonts() {
 		return fonts;
+	}
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		gestureDetector = new GestureDetector(this, new GestureListener());
+	}
+
+	@Override
+	public boolean dispatchTouchEvent(MotionEvent ev) {
+		gestureDetector.onTouchEvent(ev);
+		return super.dispatchTouchEvent(ev);
 	}
 
 	@Override
@@ -186,6 +206,34 @@ public class GameActivity extends SimpleBaseGameActivity {
 				displaySize.y = dm.heightPixels;
 			}
 			return displaySize;
+		}
+	}
+
+	private class GestureListener extends GestureDetector.SimpleOnGestureListener {
+		private final ViewConfiguration vc = ViewConfiguration.get(GameActivity.this);
+		private final int swipeMinDistance = vc.getScaledPagingTouchSlop();
+		private final int swipeThresholdVelocity = vc.getScaledMinimumFlingVelocity();
+		private final int swipeMaxOffPath = vc.getScaledTouchSlop();
+
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float xVelocity, float velocityY) {
+			final float xDiff = e2.getX() - e1.getX();
+			final float yDiff = e2.getY() - e1.getY();
+			if (Math.abs(xDiff) > swipeMaxOffPath && Math.abs(yDiff) > swipeMaxOffPath) {
+				return false;
+			}
+
+			final boolean xVelocityOk = Math.abs(xVelocity) > swipeThresholdVelocity;
+			final boolean yVelocityOk = Math.abs(xVelocity) > swipeThresholdVelocity;
+			if (-yDiff > swipeMinDistance && yVelocityOk) {
+				App.showToast("Up swipe");
+			} else if (yDiff > swipeMinDistance && yVelocityOk) {
+				App.showToast("Down swipe");
+			} else if (xDiff > swipeMinDistance && xVelocityOk) {
+				App.showToast("Right swipe");
+			} else if (-xDiff > swipeMinDistance && xVelocityOk) {
+				App.showToast("Left swipe");
+			}
+			return false;
 		}
 	}
 }
