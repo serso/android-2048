@@ -37,7 +37,8 @@
 			android:name=".GameApplication"
 			android:allowBackup="true"
 			android:debuggable="true"
-			android:hardwareAccelerated="true">
+			android:hardwareAccelerated="true"
+			android:theme="@style/app_theme">
 
 		<activity android:name=".GameActivity" android:configChanges="orientation">
 			<intent-filter>

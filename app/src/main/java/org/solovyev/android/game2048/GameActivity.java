@@ -29,6 +29,8 @@ import org.andengine.util.color.Color;
 
 import javax.annotation.Nonnull;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static org.andengine.engine.options.ScreenOrientation.PORTRAIT_FIXED;
 import static org.andengine.util.HorizontalAlign.CENTER;
 import static org.solovyev.android.game2048.Board.newBoard;
@@ -148,7 +150,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 				textWidth = FontUtils.measureText(cellFont, cellValue);
 				textHeight = cellFont.getLineHeight();
 			}
-			cell.attachChild(new Text(d.cellSize / 2 - textWidth / 2, d.cellSize / 2 - textHeight / 2, cellFont, cellValue, new TextOptions(CENTER), getVertexBufferObjectManager()));
+			cell.attachChild(new Text(d.cellSize / 2 - textWidth / 2, d.cellSize / 2 - textHeight * 5 / 12, cellFont, cellValue, new TextOptions(CENTER), getVertexBufferObjectManager()));
 		}
 		return cell;
 	}
@@ -174,8 +176,8 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 		private void calculate(@Nonnull Activity activity) {
 			final Point displaySize = getDisplaySize(activity);
-			width = displaySize.x;
-			height = displaySize.y;
+			width = min(displaySize.x, displaySize.y);
+			height = max(displaySize.x, displaySize.y);
 			calculateBoard();
 			cellPadding = board.width() / 30f;
 			cellSize = (board.width() - (Board.SIZE + 1) * cellPadding) / Board.SIZE;
@@ -183,7 +185,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 		}
 
 		private float calculateBoard() {
-			final float boardSize = Math.min(width, height) * 5f / 6f;
+			final float boardSize = min(width, height) * 5f / 6f;
 			board.left = (int) (width / 2 - boardSize / 2);
 			board.top = (int) (height / 2 - boardSize / 2);
 			board.right = (int) (board.left + boardSize);
@@ -223,15 +225,40 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 			final boolean xVelocityOk = Math.abs(xVelocity) > swipeThresholdVelocity;
 			final boolean yVelocityOk = Math.abs(yVelocity) > swipeThresholdVelocity;
-			if (-yDiff > swipeMinDistance && yVelocityOk) {
-				App.showToast("Up swipe");
-			} else if (yDiff > swipeMinDistance && yVelocityOk) {
-				App.showToast("Down swipe");
-			} else if (xDiff > swipeMinDistance && xVelocityOk) {
+			if (Math.abs(xDiff) > Math.abs(yDiff)) {
+				if(!checkLeftRightSwipes(xDiff, xVelocityOk)) {
+					checkUpDownSwipes(yDiff, yVelocityOk);
+				}
+			} else {
+				if(!checkUpDownSwipes(yDiff, yVelocityOk)) {
+					checkLeftRightSwipes(xDiff, xVelocityOk);
+				}
+			}
+
+			return false;
+		}
+
+		private boolean checkLeftRightSwipes(float xDiff, boolean xVelocityOk) {
+			if (xDiff > swipeMinDistance && xVelocityOk) {
 				App.showToast("Right swipe");
+				return true;
 			} else if (-xDiff > swipeMinDistance && xVelocityOk) {
 				App.showToast("Left swipe");
+				return true;
 			}
+
+			return false;
+		}
+
+		private boolean checkUpDownSwipes(float yDiff, boolean yVelocityOk) {
+			if (-yDiff > swipeMinDistance && yVelocityOk) {
+				App.showToast("Up swipe");
+				return true;
+			} else if (yDiff > swipeMinDistance && yVelocityOk) {
+				App.showToast("Down swipe");
+				return true;
+			}
+
 			return false;
 		}
 	}
