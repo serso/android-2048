@@ -22,7 +22,6 @@ import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
 import org.andengine.entity.util.FPSLogger;
-import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.font.Font;
 import org.andengine.opengl.font.FontUtils;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
@@ -213,9 +212,9 @@ public class GameActivity extends SimpleBaseGameActivity {
 		private final ViewConfiguration vc = ViewConfiguration.get(GameActivity.this);
 		private final int swipeMinDistance = vc.getScaledPagingTouchSlop();
 		private final int swipeThresholdVelocity = vc.getScaledMinimumFlingVelocity();
-		private final int swipeMaxOffPath = vc.getScaledTouchSlop();
+		private final int swipeMaxOffPath = Integer.MAX_VALUE;
 
-		public boolean onFling(MotionEvent e1, MotionEvent e2, float xVelocity, float velocityY) {
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float xVelocity, float yVelocity) {
 			final float xDiff = e2.getX() - e1.getX();
 			final float yDiff = e2.getY() - e1.getY();
 			if (Math.abs(xDiff) > swipeMaxOffPath && Math.abs(yDiff) > swipeMaxOffPath) {
@@ -223,7 +222,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 			}
 
 			final boolean xVelocityOk = Math.abs(xVelocity) > swipeThresholdVelocity;
-			final boolean yVelocityOk = Math.abs(xVelocity) > swipeThresholdVelocity;
+			final boolean yVelocityOk = Math.abs(yVelocity) > swipeThresholdVelocity;
 			if (-yDiff > swipeMinDistance && yVelocityOk) {
 				App.showToast("Up swipe");
 			} else if (yDiff > swipeMinDistance && yVelocityOk) {
