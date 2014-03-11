@@ -59,11 +59,19 @@ public class GameActivity extends SimpleBaseGameActivity {
 	@Nonnull
 	private final Board board = newBoard().random();
 
+	@Nonnull
+	private final Fonts fonts = new Fonts(this);
+
 	@Override
 	protected void onCreateResources() {
 		for (int i = 0; i < cellStyles.size(); i++) {
-			  cellStyles.valueAt(i).loadFont(this, d.cellFontSize);
+			  cellStyles.valueAt(i).loadFont(this, d.cellTextSize);
 		}
+	}
+
+	@Nonnull
+	public Fonts getFonts() {
+		return fonts;
 	}
 
 	@Override
@@ -113,9 +121,14 @@ public class GameActivity extends SimpleBaseGameActivity {
 		cell.setColor(getColor(cellStyle.getBgColorResId()));
 		if (c.hasValue()) {
 			final String cellValue = String.valueOf(c.getValue());
-			final Font cellFont = cellStyle.getFont();
+			Font cellFont = cellStyle.getFont();
 			float textWidth = FontUtils.measureText(cellFont, cellValue);
 			float textHeight = cellFont.getLineHeight();
+			if (textWidth > d.cellTextSize) {
+				cellFont = cellStyle.getFont(this, d.cellTextSize * d.cellTextSize / textWidth);
+				textWidth = FontUtils.measureText(cellFont, cellValue);
+				textHeight = cellFont.getLineHeight();
+			}
 			cell.attachChild(new Text(d.cellSize / 2 - textWidth / 2, d.cellSize / 2 - textHeight / 2, cellFont, cellValue, new TextOptions(CENTER), getVertexBufferObjectManager()));
 		}
 		return cell;
@@ -133,7 +146,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 		private final Rect board = new Rect();
 		private float cellPadding;
 		private float cellSize;
-		private float cellFontSize;
+		private float cellTextSize;
 		private float width;
 		private float height;
 
@@ -147,7 +160,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 			calculateBoard();
 			cellPadding = board.width() / 30f;
 			cellSize = (board.width() - (Board.SIZE + 1) * cellPadding) / Board.SIZE;
-			cellFontSize = cellSize * 2 / 3;
+			cellTextSize = cellSize * 2 / 3;
 		}
 
 		private float calculateBoard() {

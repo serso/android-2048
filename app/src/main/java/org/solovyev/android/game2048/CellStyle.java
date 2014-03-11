@@ -1,8 +1,6 @@
 package org.solovyev.android.game2048;
 
-import android.graphics.Typeface;
 import org.andengine.opengl.font.Font;
-import org.andengine.opengl.font.FontFactory;
 
 import javax.annotation.Nonnull;
 
@@ -36,9 +34,13 @@ public final class CellStyle {
 		return value;
 	}
 
-	public void loadFont(GameActivity a, float fontSize) {
-		font = FontFactory.create(a.getFontManager(), a.getTextureManager(), 256, 256, Typeface.create(Typeface.DEFAULT, Typeface.BOLD), fontSize, a.getColor(textColorResId).getARGBPackedInt());
-		font.load();
+	public void loadFont(@Nonnull GameActivity a, float fontSize) {
+		font = getFont(a, fontSize);
+	}
+
+	@Nonnull
+	Font getFont(@Nonnull GameActivity a, float fontSize) {
+		return a.getFonts().getFont(fontSize, textColorResId);
 	}
 
 	public Font getFont() {
