@@ -23,7 +23,7 @@ public abstract class CellChange {
 			this.position = position;
 		}
 	}
-	public static final class Move extends CellChange {
+	public static class Move extends CellChange {
 
 		@Nonnull
 		public final Point from;
@@ -35,6 +35,20 @@ public abstract class CellChange {
 			super(cell);
 			this.from = from;
 			this.to = to;
+		}
+
+		public static final class Merge extends Move {
+
+			@Nonnull
+			public final Cell removedCell;
+
+			public Merge(@Nonnull Cell cell,
+						 @Nonnull Point from,
+						 @Nonnull Point to,
+						 @Nonnull Cell removedCell) {
+				super(cell, from, to);
+				this.removedCell = removedCell;
+			}
 		}
 	}
 }

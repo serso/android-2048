@@ -75,11 +75,19 @@ public class Game {
 
 	@Nullable
 	private CellChange.Move goUp(int row, int col) {
-		if (!board.cells[row][col].hasValue()) {
+		final Cell cell = board.cells[row][col];
+		if (!cell.hasValue()) {
 			return null;
 		}
 		int newRow = row;
-		while (newRow > 0 && board.cells[newRow - 1][col].isEmpty()) {
+		while (newRow > 0) {
+			final Cell obstacle = board.cells[newRow - 1][col];
+			if (!obstacle.isEmpty()) {
+				if (!obstacle.isMerged() && obstacle.getValue() == cell.getValue()) {
+					newRow--;
+				}
+				break;
+			}
 			newRow--;
 		}
 		return board.updateBoard(row, col, newRow, col);
@@ -87,12 +95,20 @@ public class Game {
 
 	@Nullable
 	private CellChange.Move goDown(int row, int col) {
-		if (!board.cells[row][col].hasValue()) {
+		final Cell cell = board.cells[row][col];
+		if (!cell.hasValue()) {
 			return null;
 		}
 
 		int newRow = row;
-		while (newRow < board.size - 1 && board.cells[newRow + 1][col].isEmpty()) {
+		while (newRow < board.size - 1) {
+			final Cell obstacle = board.cells[newRow + 1][col];
+			if (!obstacle.isEmpty()) {
+				if (!obstacle.isMerged() && obstacle.getValue() == cell.getValue()) {
+					newRow++;
+				}
+				break;
+			}
 			newRow++;
 		}
 		return board.updateBoard(row, col, newRow, col);
@@ -100,12 +116,20 @@ public class Game {
 
 	@Nullable
 	private CellChange.Move goRight(int row, int col) {
-		if (!board.cells[row][col].hasValue()) {
+		final Cell cell = board.cells[row][col];
+		if (!cell.hasValue()) {
 			return null;
 		}
 
 		int newCol = col;
-		while (newCol < board.size - 1 && board.cells[row][newCol + 1].isEmpty()) {
+		while (newCol < board.size - 1) {
+			final Cell obstacle = board.cells[row][newCol + 1];
+			if (!obstacle.isEmpty()) {
+				if (!obstacle.isMerged() && obstacle.getValue() == cell.getValue()) {
+					newCol++;
+				}
+				break;
+			}
 			newCol++;
 		}
 		return board.updateBoard(row, col, row, newCol);
@@ -113,11 +137,19 @@ public class Game {
 
 	@Nullable
 	private CellChange.Move goLeft(int row, int col) {
-		if (!board.cells[row][col].hasValue()) {
+		final Cell cell = board.cells[row][col];
+		if (!cell.hasValue()) {
 			return null;
 		}
 		int newCol = col;
-		while (newCol > 0 && board.cells[row][newCol - 1].isEmpty()) {
+		while (newCol > 0) {
+			final Cell obstacle = board.cells[row][newCol - 1];
+			if (!obstacle.isEmpty()) {
+				if (!obstacle.isMerged() && obstacle.getValue() == cell.getValue()) {
+					newCol--;
+				}
+				break;
+			}
 			newCol--;
 		}
 		return board.updateBoard(row, col, row, newCol);
@@ -125,7 +157,7 @@ public class Game {
 
 	@Nonnull
 	public List<CellChange.New> prepareNextTurn() {
-		return board.addNewRandomCell();
+		return board.prepareNextTurn();
 	}
 
 }

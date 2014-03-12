@@ -38,20 +38,11 @@ public class Board {
 
 	@Nonnull
 	public Board random() {
-		for (int i = 0; i < cells.length; i++) {
-			for (int j = 0; j < cells[i].length; j++) {
-				cells[i][j] = Cell.newEmpty();
-			}
-		}
-
-		if (withWalls) {
-			addNewRandomCells(max(2, size * size / 10), Cell.WALL);
-		}
+		reset();
 
 		final int empty = getEmptyCells().size();
 		for (int i = 0; i < empty; i++) {
 			addNewRandomCells(1, (int) Math.pow(2, 1 + r.nextInt(14)));
-
 		}
 
 		return this;
@@ -66,8 +57,8 @@ public class Board {
 		}
 
 		addNewRandomCells(2);
-		if(withWalls) {
-			addNewRandomCells(max(2, size * size / 10), Cell.WALL);
+		if (withWalls) {
+			addNewRandomCells(max(2, size * size / 6), Cell.WALL);
 		}
 
 		return this;
@@ -86,7 +77,7 @@ public class Board {
 	@Nonnull
 	private List<CellChange.New> addNewRandomCells(int count, int value) {
 		final List<EmptyCell> emptyCells = getEmptyCells();
-		if(emptyCells.size() == 0) {
+		if (emptyCells.size() == 0) {
 			return Collections.emptyList();
 		} else {
 			final List<CellChange.New> newCells = new ArrayList<CellChange.New>(count);
@@ -127,13 +118,34 @@ public class Board {
 	@Nullable
 	CellChange.Move updateBoard(int row, int col, int newRow, int newCol) {
 		if (newRow != row || newCol != col) {
-			final Cell cell = cells[row][col];
-			cells[row][col] = cells[newRow][newCol];
-			cells[newRow][newCol] = cell;
-			return new CellChange.Move(cell, new Point(row, col), new Point(newRow, newCol));
-		} else {
-			return null;
+			final Cell s = cells[row][col];
+			final Cell d = cells[newRow][newCol];
+			if (s.getValue() == d.getValue()) {
+				assert !d.isMerged();
+				assert !s.isMerged();
+
+				cells[newRow][newCol] = s;
+				cells[row][col] = Cell.newEmpty();
+				s.merge();
+				return new CellChange.Move.Merge(s, new Point(row, col), new Point(newRow, newCol), d);
+			} else if (d.isEmpty()) {
+				cells[newRow][newCol] = s;
+				cells[row][col] = d;
+				return new CellChange.Move(s, new Point(row, col), new Point(newRow, newCol));
+			}
 		}
+
+		return null;
+	}
+
+	@Nonnull
+	public List<CellChange.New> prepareNextTurn() {
+		for (int i = 0; i < cells.length; i++) {
+			for (int j = 0; j < cells[i].length; j++) {
+				cells[i][j].unmerge();
+			}
+		}
+		return addNewRandomCell();
 	}
 
 	public static final class EmptyCell {

@@ -12,6 +12,8 @@ public final class Cell {
 
 	private int value;
 
+	private boolean merged = false;
+
 	@Nonnull
 	private IEntity view;
 
@@ -56,5 +58,19 @@ public final class Cell {
 
 	public boolean isWall() {
 		return value == WALL;
+	}
+
+	public void merge() {
+		assert value > 0;
+		value = 2 * value;
+		merged = true;
+	}
+
+	public boolean isMerged() {
+		return merged;
+	}
+
+	void unmerge() {
+		merged = false;
 	}
 }

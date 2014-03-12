@@ -32,6 +32,7 @@ import org.andengine.util.modifier.IModifier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.Math.max;
@@ -76,6 +77,8 @@ public class GameActivity extends SimpleBaseGameActivity {
 	@Nonnull
 	private GestureDetector gestureDetector;
 
+	private boolean animating = false;
+
 	@Override
 	protected void onCreateResources() {
 		for (int i = 0; i < cellStyles.size(); i++) {
@@ -96,7 +99,9 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
-		gestureDetector.onTouchEvent(ev);
+		if (!animating) {
+			gestureDetector.onTouchEvent(ev);
+		}
 		return super.dispatchTouchEvent(ev);
 	}
 
@@ -151,11 +156,11 @@ public class GameActivity extends SimpleBaseGameActivity {
 	}
 
 	@Nonnull
-	private IEntity createValueCell(int i, int j, @Nonnull Cell c) {
-		final Rectangle cell = createCell(i, j);
-		final String cellValue = String.valueOf(c.getValue());
-		final CellStyle cellStyle = cellStyles.get(c.getValue(), lastCellStyle);
-		cell.setColor(getColor(cellStyle.getBgColorResId()));
+	private IEntity createValueCell(int i, int j, @Nonnull Cell cell) {
+		final Rectangle cellView = createCell(i, j);
+		final String cellValue = String.valueOf(cell.getValue());
+		final CellStyle cellStyle = cellStyles.get(cell.getValue(), lastCellStyle);
+		cellView.setColor(getColor(cellStyle.getBgColorResId()));
 		Font cellFont = cellStyle.getFont();
 		float textWidth = FontUtils.measureText(cellFont, cellValue);
 		float textHeight = cellFont.getLineHeight();
@@ -164,19 +169,19 @@ public class GameActivity extends SimpleBaseGameActivity {
 			textWidth = FontUtils.measureText(cellFont, cellValue);
 			textHeight = cellFont.getLineHeight();
 		}
-		cell.attachChild(new Text(d.cellSize / 2 - textWidth / 2, d.cellSize / 2 - textHeight * 5 / 12, cellFont, cellValue, new TextOptions(CENTER), getVertexBufferObjectManager()));
-		c.setView(cell);
-		cell.registerEntityModifier(new ScaleModifier(0.2f, 1f, 1.1f, new IEntityModifier.IEntityModifierListener() {
+		cellView.attachChild(new Text(d.cellSize / 2 - textWidth / 2, d.cellSize / 2 - textHeight * 5 / 12, cellFont, cellValue, new TextOptions(CENTER), getVertexBufferObjectManager()));
+		cell.setView(cellView);
+		cellView.registerEntityModifier(new ScaleModifier(0.2f, 1f, 1.1f, new IEntityModifier.IEntityModifierListener() {
 			@Override
 			public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
 			}
 
 			@Override
 			public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-				cell.registerEntityModifier(new ScaleModifier(0.2f, 1.1f, 1f));
+				cellView.registerEntityModifier(new ScaleModifier(0.2f, 1.1f, 1f));
 			}
 		}));
-		return cell;
+		return cellView;
 	}
 
 	@Nonnull
@@ -303,7 +308,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 			}
 
 			if (direction != null) {
-				doMove(direction);
+				go(direction);
 			}
 
 			return false;
@@ -332,35 +337,57 @@ public class GameActivity extends SimpleBaseGameActivity {
 		}
 	}
 
-	private void doMove(@Nonnull Direction direction) {
-		final CellsMoveListener cellsMoveListener = new CellsMoveListener();
+	private void go(@Nonnull Direction direction) {
+		final CellsAnimationListener cellsAnimationListener = new CellsAnimationListener();
 
-		final List<CellChange.Move> changes = game.go(direction);
-		for (CellChange.Move change : changes) {
-			final Point from = newCellPosition(change.from.x, change.from.y);
-			final Point to = newCellPosition(change.to.x, change.to.y);
-			final IEntity cellView = change.cell.getView();
-			cellView.registerEntityModifier(new MoveModifier(0.2f, from.x, to.x, from.y, to.y, cellsMoveListener));
+		final List<CellChange.Move> moves = game.go(direction);
+		for (CellChange.Move move : moves) {
+			final Point from = newCellPosition(move.from.x, move.from.y);
+			final Point to = newCellPosition(move.to.x, move.to.y);
+			final IEntity cellView = move.cell.getView();
+			cellView.registerEntityModifier(new MoveModifier(0.2f, from.x, to.x, from.y, to.y, cellsAnimationListener));
+			if (move instanceof CellChange.Move.Merge) {
+				final CellChange.Move.Merge merge = (CellChange.Move.Merge) move;
+				cellsAnimationListener.merges.add(merge);
+			}
 		}
 	}
 
-	private class CellsMoveListener implements IEntityModifier.IEntityModifierListener {
+	private class CellsAnimationListener implements IEntityModifier.IEntityModifierListener {
+
+		@Nonnull
+		private final List<CellChange.Move.Merge> merges = new ArrayList<CellChange.Move.Merge>();
+
 		private int count = 0;
 
 		@Override
 		public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
 			count++;
+			animating = true;
 		}
 
 		@Override
 		public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
 			count--;
 			if (count == 0) {
-				final List<CellChange.New> newCells = game.prepareNextTurn();
-				for (CellChange.New newCell : newCells) {
-					final IEntity boardView = game.getBoard().getView();
-					boardView.attachChild(createValueCell(newCell.position.x, newCell.position.y, newCell.cell));
-				}
+				runOnUpdateThread(new Runnable() {
+					@Override
+					public void run() {
+						final IEntity boardView = game.getBoard().getView();
+
+						for (CellChange.Move.Merge merge : merges) {
+							boardView.detachChild(merge.cell.getView());
+							boardView.attachChild(createValueCell(merge.to.x, merge.to.y));
+							boardView.detachChild(merge.removedCell.getView());
+						}
+
+						final List<CellChange.New> newCells = game.prepareNextTurn();
+						for (CellChange.New newCell : newCells) {
+							boardView.attachChild(createValueCell(newCell.position.x, newCell.position.y, newCell.cell));
+						}
+					}
+				});
+				animating = false;
 			}
 		}
 	}
