@@ -1,7 +1,5 @@
 package org.solovyev.android.game2048;
 
-import android.graphics.Point;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -32,8 +30,8 @@ public class Game {
 	}
 
 	@Nonnull
-	public List<Change> go(@Nonnull Direction direction) {
-		final List<Change> changes = new ArrayList<Change>();
+	public List<CellChange.Move> go(@Nonnull Direction direction) {
+		final List<CellChange.Move> changes = new ArrayList<CellChange.Move>();
 
 		switch (direction) {
 			case left:
@@ -69,14 +67,14 @@ public class Game {
 		return changes;
 	}
 
-	private void add(@Nonnull List<Change> changes, @Nullable Change change) {
+	private void add(@Nonnull List<CellChange.Move> changes, @Nullable CellChange.Move change) {
 		if (change != null) {
 			changes.add(change);
 		}
 	}
 
 	@Nullable
-	private Change goUp(int row, int col) {
+	private CellChange.Move goUp(int row, int col) {
 		if (!board.cells[row][col].hasValue()) {
 			return null;
 		}
@@ -88,7 +86,7 @@ public class Game {
 	}
 
 	@Nullable
-	private Change goDown(int row, int col) {
+	private CellChange.Move goDown(int row, int col) {
 		if (!board.cells[row][col].hasValue()) {
 			return null;
 		}
@@ -101,7 +99,7 @@ public class Game {
 	}
 
 	@Nullable
-	private Change goRight(int row, int col) {
+	private CellChange.Move goRight(int row, int col) {
 		if (!board.cells[row][col].hasValue()) {
 			return null;
 		}
@@ -114,7 +112,7 @@ public class Game {
 	}
 
 	@Nullable
-	private Change goLeft(int row, int col) {
+	private CellChange.Move goLeft(int row, int col) {
 		if (!board.cells[row][col].hasValue()) {
 			return null;
 		}
@@ -126,25 +124,8 @@ public class Game {
 	}
 
 	@Nonnull
-	public List<Change> prepareNextTurn() {
+	public List<CellChange.New> prepareNextTurn() {
 		return board.addNewRandomCell();
 	}
 
-	public static final class Change {
-
-		@Nonnull
-		public final Board.Cell cell;
-
-		@Nonnull
-		public Point from;
-
-		@Nonnull
-		public Point to;
-
-		public Change(@Nonnull Board.Cell cell, @Nonnull Point from, @Nonnull Point to) {
-			this.cell = cell;
-			this.from = from;
-			this.to = to;
-		}
-	}
 }

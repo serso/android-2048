@@ -142,7 +142,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 	@Nullable
 	private IEntity createValueCell(int i, int j) {
-		final Board.Cell c = game.getBoard().getCell(i, j);
+		final Cell c = game.getBoard().getCell(i, j);
 		if (c.hasValue()) {
 			return createValueCell(i, j, c);
 		} else {
@@ -151,7 +151,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 	}
 
 	@Nonnull
-	private IEntity createValueCell(int i, int j, @Nonnull Board.Cell c) {
+	private IEntity createValueCell(int i, int j, @Nonnull Cell c) {
 		final Rectangle cell = createCell(i, j);
 		final String cellValue = String.valueOf(c.getValue());
 		final CellStyle cellStyle = cellStyles.get(c.getValue(), lastCellStyle);
@@ -190,7 +190,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 	@Nonnull
 	private IEntity createNotValueCell(int i, int j) {
-		final Board.Cell c = game.getBoard().getCell(i, j);
+		final Cell c = game.getBoard().getCell(i, j);
 		if (c.isWall()) {
 			final Rectangle cell = createCell(i, j);
 			final CellStyle cellStyle = cellStyles.get(c.getValue(), lastCellStyle);
@@ -335,8 +335,8 @@ public class GameActivity extends SimpleBaseGameActivity {
 	private void doMove(@Nonnull Direction direction) {
 		final CellsMoveListener cellsMoveListener = new CellsMoveListener();
 
-		final List<Game.Change> changes = game.go(direction);
-		for (Game.Change change : changes) {
+		final List<CellChange.Move> changes = game.go(direction);
+		for (CellChange.Move change : changes) {
 			final Point from = newCellPosition(change.from.x, change.from.y);
 			final Point to = newCellPosition(change.to.x, change.to.y);
 			final IEntity cellView = change.cell.getView();
@@ -356,10 +356,10 @@ public class GameActivity extends SimpleBaseGameActivity {
 		public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
 			count--;
 			if (count == 0) {
-				final List<Game.Change> newCells = game.prepareNextTurn();
-				for (Game.Change newCell : newCells) {
+				final List<CellChange.New> newCells = game.prepareNextTurn();
+				for (CellChange.New newCell : newCells) {
 					final IEntity boardView = game.getBoard().getView();
-					boardView.attachChild(createValueCell(newCell.to.x, newCell.to.y, newCell.cell));
+					boardView.attachChild(createValueCell(newCell.position.x, newCell.position.y, newCell.cell));
 				}
 			}
 		}

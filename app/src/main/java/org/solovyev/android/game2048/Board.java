@@ -74,27 +74,27 @@ public class Board {
 	}
 
 	@Nonnull
-	public List<Game.Change> addNewRandomCell() {
+	public List<CellChange.New> addNewRandomCell() {
 		return addNewRandomCells(1);
 	}
 
 	@Nonnull
-	private List<Game.Change> addNewRandomCells(int count) {
+	private List<CellChange.New> addNewRandomCells(int count) {
 		return addNewRandomCells(count, Cell.START_VALUE);
 	}
 
 	@Nonnull
-	private List<Game.Change> addNewRandomCells(int count, int value) {
+	private List<CellChange.New> addNewRandomCells(int count, int value) {
 		final List<EmptyCell> emptyCells = getEmptyCells();
 		if(emptyCells.size() == 0) {
 			return Collections.emptyList();
 		} else {
-			final List<Game.Change> newCells = new ArrayList<Game.Change>(count);
+			final List<CellChange.New> newCells = new ArrayList<CellChange.New>(count);
 			do {
 				final int position = r.nextInt(emptyCells.size());
 				final EmptyCell emptyCell = emptyCells.get(position);
-				emptyCell.cell.value = value;
-				newCells.add(new Game.Change(emptyCell.cell, emptyCell.position, emptyCell.position));
+				emptyCell.cell.setValue(value);
+				newCells.add(new CellChange.New(emptyCell.cell, emptyCell.position));
 				emptyCells.remove(position);
 				count--;
 			} while (count > 0 && !emptyCells.isEmpty());
@@ -125,12 +125,12 @@ public class Board {
 	}
 
 	@Nullable
-	Game.Change updateBoard(int row, int col, int newRow, int newCol) {
+	CellChange.Move updateBoard(int row, int col, int newRow, int newCol) {
 		if (newRow != row || newCol != col) {
-			final Board.Cell cell = cells[row][col];
+			final Cell cell = cells[row][col];
 			cells[row][col] = cells[newRow][newCol];
 			cells[newRow][newCol] = cell;
-			return new Game.Change(cell, new Point(row, col), new Point(newRow, newCol));
+			return new CellChange.Move(cell, new Point(row, col), new Point(newRow, newCol));
 		} else {
 			return null;
 		}
@@ -146,56 +146,6 @@ public class Board {
 		public EmptyCell(@Nonnull Cell cell, @Nonnull Point position) {
 			this.cell = cell;
 			this.position = position;
-		}
-	}
-
-	public static final class Cell {
-		static final int START_VALUE = 2;
-		private static final int NO_VALUE = 0;
-		private static final int WALL = -1;
-
-		private int value;
-
-		@Nonnull
-		private IEntity view;
-
-		public Cell(int value) {
-			this.value = value;
-		}
-
-		@Nonnull
-		public static Cell newWall() {
-			return new Cell(WALL);
-		}
-
-		@Nonnull
-		public static Cell newEmpty() {
-			return new Cell(NO_VALUE);
-		}
-
-		public int getValue() {
-			return value;
-		}
-
-		public boolean hasValue() {
-			return value > NO_VALUE;
-		}
-
-		public boolean isEmpty() {
-			return value == NO_VALUE;
-		}
-
-		public void setView(@Nonnull IEntity view) {
-			this.view = view;
-		}
-
-		@Nonnull
-		public IEntity getView() {
-			return view;
-		}
-
-		public boolean isWall() {
-			return value == WALL;
 		}
 	}
 
