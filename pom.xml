@@ -172,12 +172,6 @@
 
 			<dependency>
 				<groupId>org.solovyev</groupId>
-				<artifactId>common-msg</artifactId>
-				<version>${jcl.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.solovyev</groupId>
 				<artifactId>common-core-jodatime</artifactId>
 				<version>${jcl.version}</version>
 			</dependency>
@@ -190,56 +184,7 @@
 
 			<dependency>
 				<groupId>org.solovyev.android</groupId>
-				<artifactId>android-common-ads</artifactId>
-				<version>${acl.version}</version>
-				<type>apklib</type>
-			</dependency>
-
-			<dependency>
-				<groupId>org.solovyev.android</groupId>
-				<artifactId>android-common-http</artifactId>
-				<version>${acl.version}</version>
-				<type>apklib</type>
-			</dependency>
-
-			<dependency>
-				<groupId>org.solovyev.android</groupId>
-				<artifactId>android-common-db</artifactId>
-				<version>${acl.version}</version>
-				<type>apklib</type>
-			</dependency>
-
-			<dependency>
-				<groupId>org.solovyev.android</groupId>
 				<artifactId>android-common-views</artifactId>
-				<version>${acl.version}</version>
-				<type>apklib</type>
-			</dependency>
-
-			<dependency>
-				<groupId>org.solovyev.android</groupId>
-				<artifactId>android-common-security</artifactId>
-				<version>${acl.version}</version>
-				<type>apklib</type>
-			</dependency>
-
-			<dependency>
-				<groupId>org.solovyev.android</groupId>
-				<artifactId>android-common-sherlock</artifactId>
-				<version>${acl.version}</version>
-				<type>apklib</type>
-			</dependency>
-
-			<dependency>
-				<groupId>org.solovyev.android</groupId>
-				<artifactId>android-common-networks</artifactId>
-				<version>${acl.version}</version>
-				<type>apklib</type>
-			</dependency>
-
-			<dependency>
-				<groupId>org.solovyev.android</groupId>
-				<artifactId>android-common-fragments</artifactId>
 				<version>${acl.version}</version>
 				<type>apklib</type>
 			</dependency>
@@ -253,7 +198,7 @@
 
 			<dependency>
 				<groupId>org.solovyev.android</groupId>
-				<artifactId>android-common-wizard</artifactId>
+				<artifactId>android-common-preferences</artifactId>
 				<version>${acl.version}</version>
 				<type>apklib</type>
 			</dependency>

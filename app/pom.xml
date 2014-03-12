@@ -40,24 +40,21 @@
 			<type>apklib</type>
 		</dependency>
 
-		<!-- OWN -->
-
 		<dependency>
 			<groupId>org.solovyev.android</groupId>
-			<artifactId>android-common-db</artifactId>
+			<artifactId>android-common-preferences</artifactId>
 			<type>apklib</type>
 		</dependency>
 
 		<dependency>
 			<groupId>org.solovyev.android</groupId>
-			<artifactId>android-common-http</artifactId>
+			<artifactId>android-common-views</artifactId>
 			<type>apklib</type>
 		</dependency>
 
 		<dependency>
-			<groupId>org.solovyev.android</groupId>
-			<artifactId>android-common-fragments</artifactId>
-			<type>apklib</type>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
 		</dependency>
 
 		<dependency>

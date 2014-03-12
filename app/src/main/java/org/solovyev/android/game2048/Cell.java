@@ -17,7 +17,7 @@ public final class Cell {
 	@Nonnull
 	private IEntity view;
 
-	public Cell(int value) {
+	private Cell(int value) {
 		this.value = value;
 	}
 
@@ -72,5 +72,14 @@ public final class Cell {
 
 	void unmerge() {
 		merged = false;
+	}
+
+	@Nonnull
+	public String toJson() {
+		return String.valueOf(value);
+	}
+
+	public static Cell fromJson(@Nonnull String json) {
+		return new Cell(Integer.parseInt(json));
 	}
 }

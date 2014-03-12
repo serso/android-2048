@@ -1,7 +1,10 @@
 package org.solovyev.android.game2048;
 
 import android.graphics.Point;
+import com.google.common.base.Splitter;
 import org.andengine.entity.IEntity;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -15,30 +18,34 @@ import static java.lang.System.currentTimeMillis;
 
 public class Board {
 
+	private static final String JSON_SIZE = "size";
+	private static final String JSON_CELLS = "cells";
+	private static final String JSON_SEPARATOR_ROW = ";";
+	private static final String JSON_SEPARATOR_CELL = ",";
+
 	private final Random r = new Random(currentTimeMillis());
 
 	final Cell[][] cells;
 	final int size;
-	final boolean withWalls;
 
 	@Nonnull
 	private IEntity view;
 
-	private Board(int size, boolean withWalls) {
+	private Board(int size) {
 		this.size = size;
-		this.withWalls = withWalls;
 		this.cells = new Cell[size][size];
-		reset();
 	}
 
 	@Nonnull
 	public static Board newBoard(int size, boolean withWalls) {
-		return new Board(size, withWalls);
+		final Board board = new Board(size);
+		board.reset(withWalls);
+		return board;
 	}
 
 	@Nonnull
-	public Board random() {
-		reset();
+	public Board random(boolean withWalls) {
+		reset(withWalls);
 
 		final int empty = getEmptyCells().size();
 		for (int i = 0; i < empty; i++) {
@@ -49,7 +56,7 @@ public class Board {
 	}
 
 	@Nonnull
-	public Board reset() {
+	public Board reset(boolean withWalls) {
 		for (int i = 0; i < cells.length; i++) {
 			for (int j = 0; j < cells[i].length; j++) {
 				cells[i][j] = Cell.newEmpty();
@@ -146,6 +153,46 @@ public class Board {
 			}
 		}
 		return addNewRandomCell();
+	}
+
+	@Nonnull
+	public JSONObject toJson() throws JSONException {
+		final JSONObject result = new JSONObject();
+		result.put(JSON_SIZE, size);
+		final StringBuilder sb = new StringBuilder(size * size * 3);
+		for (int i = 0; i < cells.length; i++) {
+			if (i > 0) {
+				sb.append(JSON_SEPARATOR_ROW);
+			}
+			for (int j = 0; j < cells[i].length; j++) {
+				if (j > 0) {
+					sb.append(JSON_SEPARATOR_CELL);
+				}
+				sb.append(cells[i][j].toJson());
+			}
+		}
+		result.put(JSON_CELLS, sb.toString());
+		return result;
+	}
+
+	@Nonnull
+	public static Board fromJson(@Nonnull JSONObject json) throws JSONException {
+		final int size = json.getInt(JSON_SIZE);
+		final Board board = new Board(size);
+		final String cells = json.getString(JSON_CELLS);
+
+		int i = 0;
+		final Splitter rowSplitter = Splitter.on(JSON_SEPARATOR_ROW);
+		final Splitter cellSplitter = Splitter.on(JSON_SEPARATOR_CELL);
+		for (String row : rowSplitter.split(cells)) {
+			int j = 0;
+			for (String cell : cellSplitter.split(row)) {
+				board.cells[i][j] = Cell.fromJson(cell);
+				j++;
+			}
+			i++;
+		}
+		return board;
 	}
 
 	public static final class EmptyCell {

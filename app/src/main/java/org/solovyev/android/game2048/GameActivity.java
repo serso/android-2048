@@ -16,7 +16,9 @@ import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.Entity;
 import org.andengine.entity.IEntity;
-import org.andengine.entity.modifier.*;
+import org.andengine.entity.modifier.IEntityModifier;
+import org.andengine.entity.modifier.MoveModifier;
+import org.andengine.entity.modifier.ScaleModifier;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
@@ -28,10 +30,10 @@ import org.andengine.opengl.font.FontUtils;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
 import org.andengine.util.color.Color;
 import org.andengine.util.modifier.IModifier;
+import org.solovyev.android.prefs.StringPreference;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +44,9 @@ import static org.andengine.util.HorizontalAlign.CENTER;
 import static org.solovyev.android.game2048.CellStyle.newCellStyle;
 
 public class GameActivity extends SimpleBaseGameActivity {
+
+	@Nonnull
+	private final StringPreference<String> state = StringPreference.of("state", null);
 
 	@Nonnull
 	private final SparseArray<CellStyle> cellStyles = new SparseArray<CellStyle>();
@@ -227,6 +232,18 @@ public class GameActivity extends SimpleBaseGameActivity {
 		d.calculate(this, game);
 		final Camera camera = new Camera(0, 0, d.width, d.height);
 		return new EngineOptions(true, PORTRAIT_FIXED, new RatioResolutionPolicy(d.width, d.height), camera);
+	}
+
+	@Override
+	protected synchronized void onResume() {
+		super.onResume();
+		game.loadState(state.getPreference(App.getPreferences()));
+	}
+
+	@Override
+	protected void onPause() {
+		state.putPreference(App.getPreferences(), game.saveState());
+		super.onPause();
 	}
 
 	private static final class Dimensions {

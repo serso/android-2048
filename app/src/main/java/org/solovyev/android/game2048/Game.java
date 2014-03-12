@@ -1,5 +1,10 @@
 package org.solovyev.android.game2048;
 
+import android.util.Log;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.solovyev.common.text.Strings;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -12,9 +17,10 @@ public class Game {
 
 	private static final int BOARD_SIZE = 6;
 	private static final boolean WITH_WALLS = true;
+	private static final String JSON_BOARD = "board";
 
 	@Nonnull
-	private final Board board = newBoard(BOARD_SIZE, WITH_WALLS);
+	private Board board = newBoard(BOARD_SIZE, WITH_WALLS);
 
 	private Game() {
 	}
@@ -160,4 +166,31 @@ public class Game {
 		return board.prepareNextTurn();
 	}
 
+	@Nullable
+	public String saveState() {
+		try {
+			final JSONObject json = new JSONObject();
+			json.put(JSON_BOARD, board.toJson());
+			return json.toString();
+		} catch (RuntimeException e) {
+			Log.e(App.TAG, e.getMessage(), e);
+		} catch (JSONException e) {
+			Log.e(App.TAG, e.getMessage(), e);
+		}
+
+		return null;
+	}
+
+	public void loadState(@Nullable String state) {
+		try {
+			if (!Strings.isEmpty(state)) {
+				final JSONObject json = new JSONObject(state);
+				this.board = Board.fromJson(json.getJSONObject(JSON_BOARD));
+			}
+		} catch (RuntimeException e) {
+			Log.e(App.TAG, e.getMessage(), e);
+		} catch (JSONException e) {
+			Log.e(App.TAG, e.getMessage(), e);
+		}
+	}
 }

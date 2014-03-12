@@ -1,12 +1,15 @@
 package org.solovyev.android.game2048;
 
 import android.app.Application;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.widget.Toast;
 import org.solovyev.android.Threads;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
 public final class App {
 
@@ -20,6 +23,9 @@ public final class App {
 	private Application application;
 
 	@Nonnull
+	private SharedPreferences preferences;
+
+	@Nonnull
 	private Handler uiHandler;
 
 	private App() {
@@ -27,6 +33,7 @@ public final class App {
 
 	private void init0(@Nonnull Application application) {
 		this.application = application;
+		this.preferences = getDefaultSharedPreferences(application);
 		this.uiHandler = Threads.newUiHandler();
 	}
 
@@ -73,6 +80,11 @@ public final class App {
 	@Nonnull
 	public static Application getApplication() {
 		return instance.application;
+	}
+
+	@Nonnull
+	public static SharedPreferences getPreferences() {
+		return instance.preferences;
 	}
 
 	@Nonnull
