@@ -16,8 +16,7 @@ import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.Entity;
 import org.andengine.entity.IEntity;
-import org.andengine.entity.modifier.IEntityModifier;
-import org.andengine.entity.modifier.MoveModifier;
+import org.andengine.entity.modifier.*;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
@@ -29,6 +28,8 @@ import org.andengine.opengl.font.FontUtils;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
 import org.andengine.util.color.Color;
 import org.andengine.util.modifier.IModifier;
+import org.andengine.util.modifier.ease.EaseBounceIn;
+import org.andengine.util.modifier.ease.EaseBounceOut;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -166,6 +167,16 @@ public class GameActivity extends SimpleBaseGameActivity {
 		}
 		cell.attachChild(new Text(d.cellSize / 2 - textWidth / 2, d.cellSize / 2 - textHeight * 5 / 12, cellFont, cellValue, new TextOptions(CENTER), getVertexBufferObjectManager()));
 		c.setView(cell);
+		cell.registerEntityModifier(new ScaleModifier(0.2f, 1f, 1.1f, new IEntityModifier.IEntityModifierListener() {
+			@Override
+			public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
+			}
+
+			@Override
+			public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+				cell.registerEntityModifier(new ScaleModifier(0.2f, 1.1f, 1f));
+			}
+		}));
 		return cell;
 	}
 
@@ -223,8 +234,8 @@ public class GameActivity extends SimpleBaseGameActivity {
 			width = min(displaySize.x, displaySize.y);
 			height = max(displaySize.x, displaySize.y);
 			calculateBoard();
-			cellPadding = board.width() / 30f;
 			final int size = game.getBoard().getSize();
+			cellPadding = 0.15f * board.width() / size;
 			cellSize = (board.width() - (size + 1) * cellPadding) / size;
 			cellTextSize = cellSize * 2 / 3;
 		}
