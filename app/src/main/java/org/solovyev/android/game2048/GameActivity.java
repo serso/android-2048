@@ -104,7 +104,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
-		if (!animating) {
+		if (!animating && isGameRunning()) {
 			gestureDetector.onTouchEvent(ev);
 		}
 		return super.dispatchTouchEvent(ev);
@@ -113,6 +113,8 @@ public class GameActivity extends SimpleBaseGameActivity {
 	@Override
 	protected Scene onCreateScene() {
 		this.mEngine.registerUpdateHandler(new FPSLogger());
+
+		game.loadState(state.getPreference(App.getPreferences()));
 
 		final Scene scene = new Scene();
 		scene.setBackground(new Background(getColor(R.color.bg)));
@@ -232,12 +234,6 @@ public class GameActivity extends SimpleBaseGameActivity {
 		d.calculate(this, game);
 		final Camera camera = new Camera(0, 0, d.width, d.height);
 		return new EngineOptions(true, PORTRAIT_FIXED, new RatioResolutionPolicy(d.width, d.height), camera);
-	}
-
-	@Override
-	protected synchronized void onResume() {
-		super.onResume();
-		game.loadState(state.getPreference(App.getPreferences()));
 	}
 
 	@Override
