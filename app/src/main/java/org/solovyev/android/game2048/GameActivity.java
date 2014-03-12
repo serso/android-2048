@@ -238,7 +238,9 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 	@Override
 	protected void onPause() {
-		state.putPreference(App.getPreferences(), game.saveState());
+		if (game.isStateLoaded()) {
+			state.putPreference(App.getPreferences(), game.saveState());
+		}
 		super.onPause();
 	}
 

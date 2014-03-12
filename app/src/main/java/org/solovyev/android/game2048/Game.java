@@ -22,6 +22,8 @@ public class Game {
 	@Nonnull
 	private Board board = newBoard(BOARD_SIZE, WITH_WALLS);
 
+	private boolean stateLoaded = false;
+
 	private Game() {
 	}
 
@@ -192,5 +194,11 @@ public class Game {
 		} catch (JSONException e) {
 			Log.e(App.TAG, e.getMessage(), e);
 		}
+
+		stateLoaded = true;
+	}
+
+	public boolean isStateLoaded() {
+		return stateLoaded;
 	}
 }
