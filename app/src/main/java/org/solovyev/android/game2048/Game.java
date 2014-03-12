@@ -141,7 +141,7 @@ public class Game {
 		@Nonnull
 		public Point to;
 
-		public Change(Board.Cell cell, @Nonnull Point from, @Nonnull Point to) {
+		public Change(@Nonnull Board.Cell cell, @Nonnull Point from, @Nonnull Point to) {
 			this.cell = cell;
 			this.from = from;
 			this.to = to;

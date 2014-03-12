@@ -85,16 +85,16 @@ public class Board {
 
 	@Nonnull
 	private List<Game.Change> addNewRandomCells(int count, int value) {
-		final List<Game.Change> emptyCells = getEmptyCells();
+		final List<EmptyCell> emptyCells = getEmptyCells();
 		if(emptyCells.size() == 0) {
 			return Collections.emptyList();
 		} else {
 			final List<Game.Change> newCells = new ArrayList<Game.Change>(count);
 			do {
 				final int position = r.nextInt(emptyCells.size());
-				final Game.Change change = emptyCells.get(position);
-				change.cell.value = value;
-				newCells.add(change);
+				final EmptyCell emptyCell = emptyCells.get(position);
+				emptyCell.cell.value = value;
+				newCells.add(new Game.Change(emptyCell.cell, emptyCell.position, emptyCell.position));
 				emptyCells.remove(position);
 				count--;
 			} while (count > 0 && !emptyCells.isEmpty());
@@ -103,13 +103,12 @@ public class Board {
 	}
 
 	@Nonnull
-	private List<Game.Change> getEmptyCells() {
-		final List<Game.Change> result = new ArrayList<Game.Change>();
+	private List<EmptyCell> getEmptyCells() {
+		final List<EmptyCell> result = new ArrayList<EmptyCell>();
 		for (int i = 0; i < cells.length; i++) {
 			for (int j = 0; j < cells[i].length; j++) {
 				if (cells[i][j].isEmpty()) {
-					final Point position = new Point(i, j);
-					result.add(new Game.Change(cells[i][j], position, position));
+					result.add(new EmptyCell(cells[i][j], new Point(i, j)));
 				}
 			}
 		}
@@ -134,6 +133,19 @@ public class Board {
 			return new Game.Change(cell, new Point(row, col), new Point(newRow, newCol));
 		} else {
 			return null;
+		}
+	}
+
+	public static final class EmptyCell {
+		@Nonnull
+		private final Cell cell;
+
+		@Nonnull
+		private final Point position;
+
+		public EmptyCell(@Nonnull Cell cell, @Nonnull Point position) {
+			this.cell = cell;
+			this.position = position;
 		}
 	}
 
