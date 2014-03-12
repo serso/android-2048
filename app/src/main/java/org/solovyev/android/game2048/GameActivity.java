@@ -16,6 +16,8 @@ import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.Entity;
 import org.andengine.entity.IEntity;
+import org.andengine.entity.modifier.IEntityModifier;
+import org.andengine.entity.modifier.MoveModifier;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
@@ -26,6 +28,7 @@ import org.andengine.opengl.font.Font;
 import org.andengine.opengl.font.FontUtils;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
 import org.andengine.util.color.Color;
+import org.andengine.util.modifier.IModifier;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -193,7 +196,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 	private Point newCellPosition(int row, int col) {
 		final float x = col * d.cellSize + (col + 1) * d.cellPadding;
 		final float y = row * d.cellSize + (row + 1) * d.cellPadding;
-		return new Point((int)x, (int)y);
+		return new Point((int) x, (int) y);
 	}
 
 	@Override
@@ -282,19 +285,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 			}
 
 			if (direction != null) {
-				final List<Game.Change> changes = game.go(direction);
-				for (Game.Change change : changes) {
-					final Point position = newCellPosition(change.to.x, change.to.y);
-					change.cell.getView().setPosition(position.x, position.y);
-				}
-
-				if(!changes.isEmpty()) {
-					final List<Game.Change> newCells = game.prepareNextTurn();
-					for (Game.Change newCell : newCells) {
-						final IEntity boardView = game.getBoard().getView();
-						boardView.attachChild(createValueCell(newCell.to.x, newCell.to.y, newCell.cell));
-					}
-				}
+				doMove(direction);
 			}
 
 			return false;
@@ -320,6 +311,39 @@ public class GameActivity extends SimpleBaseGameActivity {
 			}
 
 			return null;
+		}
+	}
+
+	private void doMove(@Nonnull Direction direction) {
+		final CellsMoveListener cellsMoveListener = new CellsMoveListener();
+
+		final List<Game.Change> changes = game.go(direction);
+		for (Game.Change change : changes) {
+			final Point from = newCellPosition(change.from.x, change.from.y);
+			final Point to = newCellPosition(change.to.x, change.to.y);
+			final IEntity cellView = change.cell.getView();
+			cellView.registerEntityModifier(new MoveModifier(0.2f, from.x, to.x, from.y, to.y, cellsMoveListener));
+		}
+	}
+
+	private class CellsMoveListener implements IEntityModifier.IEntityModifierListener {
+		private int count = 0;
+
+		@Override
+		public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
+			count++;
+		}
+
+		@Override
+		public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+			count--;
+			if (count == 0) {
+				final List<Game.Change> newCells = game.prepareNextTurn();
+				for (Game.Change newCell : newCells) {
+					final IEntity boardView = game.getBoard().getView();
+					boardView.attachChild(createValueCell(newCell.to.x, newCell.to.y, newCell.cell));
+				}
+			}
 		}
 	}
 }
