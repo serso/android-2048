@@ -28,12 +28,14 @@ import org.andengine.ui.activity.SimpleBaseGameActivity;
 import org.andengine.util.color.Color;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import java.util.List;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static org.andengine.engine.options.ScreenOrientation.PORTRAIT_FIXED;
 import static org.andengine.util.HorizontalAlign.CENTER;
-import static org.solovyev.android.game2048.Board.newBoard;
 import static org.solovyev.android.game2048.CellStyle.newCellStyle;
 
 public class GameActivity extends SimpleBaseGameActivity {
@@ -63,7 +65,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 	private final Dimensions d = new Dimensions();
 
 	@Nonnull
-	private final Board board = newBoard().random();
+	private final Game game = Game.newGame();
 
 	@Nonnull
 	private final Fonts fonts = new Fonts(this);
@@ -108,18 +110,60 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 	@Nonnull
 	private IEntity createBoard() {
-		final Entity board = new Entity(d.board.left, d.board.top);
+		final Entity boardView = new Entity(d.board.left, d.board.top);
 		final Rectangle boardRect = new Rectangle(0, 0, d.board.width(), d.board.height(), getVertexBufferObjectManager());
 		boardRect.setColor(getColor(R.color.board_bg));
-		board.attachChild(boardRect);
+		boardView.attachChild(boardRect);
 
-		for (int i = 0; i < Board.SIZE; i++) {
-			for (int j = 0; j < Board.SIZE; j++) {
-				board.attachChild(createCell(i, j));
+		final Board board = game.getBoard();
+		board.setView(boardView);
+		final int size = board.getSize();
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				boardView.attachChild(createEmptyCell(i, j));
 			}
 		}
 
-		return board;
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				final IEntity cell = createValueCell(i, j);
+				if (cell != null) {
+					boardView.attachChild(cell);
+				}
+			}
+		}
+
+		return boardView;
+	}
+
+
+	@Nullable
+	private IEntity createValueCell(int i, int j) {
+		final Board.Cell c = game.getBoard().getCell(i, j);
+		if (c.hasValue()) {
+			return createValueCell(i, j, c);
+		} else {
+			return null;
+		}
+	}
+
+	@Nonnull
+	private IEntity createValueCell(int i, int j, @Nonnull Board.Cell c) {
+		final Rectangle cell = createCell(i, j);
+		final String cellValue = String.valueOf(c.getValue());
+		final CellStyle cellStyle = cellStyles.get(c.getValue(), lastCellStyle);
+		cell.setColor(getColor(cellStyle.getBgColorResId()));
+		Font cellFont = cellStyle.getFont();
+		float textWidth = FontUtils.measureText(cellFont, cellValue);
+		float textHeight = cellFont.getLineHeight();
+		if (textWidth > d.cellTextSize) {
+			cellFont = cellStyle.getFont(this, d.cellTextSize * d.cellTextSize / textWidth);
+			textWidth = FontUtils.measureText(cellFont, cellValue);
+			textHeight = cellFont.getLineHeight();
+		}
+		cell.attachChild(new Text(d.cellSize / 2 - textWidth / 2, d.cellSize / 2 - textHeight * 5 / 12, cellFont, cellValue, new TextOptions(CENTER), getVertexBufferObjectManager()));
+		c.setView(cell);
+		return cell;
 	}
 
 	@Nonnull
@@ -132,32 +176,29 @@ public class GameActivity extends SimpleBaseGameActivity {
 	}
 
 	@Nonnull
-	private IEntity createCell(int i, int j) {
-		final Board.Cell c = board.getCell(i, j);
-		float x = i * d.cellSize + (i + 1) * d.cellPadding;
-		float y = j * d.cellSize + (j + 1) * d.cellPadding;
-		final Rectangle cell = new Rectangle(x, y, d.cellSize, d.cellSize, getVertexBufferObjectManager());
+	private IEntity createEmptyCell(int i, int j) {
+		return createCell(i, j);
+	}
 
-		final CellStyle cellStyle = cellStyles.get(c.getValue(), lastCellStyle);
+	private Rectangle createCell(int i, int j) {
+		final Point position = newCellPosition(i, j);
+		final Rectangle cell = new Rectangle(position.x, position.y, d.cellSize, d.cellSize, getVertexBufferObjectManager());
+
+		final CellStyle cellStyle = cellStyles.get(0, lastCellStyle);
 		cell.setColor(getColor(cellStyle.getBgColorResId()));
-		if (c.hasValue()) {
-			final String cellValue = String.valueOf(c.getValue());
-			Font cellFont = cellStyle.getFont();
-			float textWidth = FontUtils.measureText(cellFont, cellValue);
-			float textHeight = cellFont.getLineHeight();
-			if (textWidth > d.cellTextSize) {
-				cellFont = cellStyle.getFont(this, d.cellTextSize * d.cellTextSize / textWidth);
-				textWidth = FontUtils.measureText(cellFont, cellValue);
-				textHeight = cellFont.getLineHeight();
-			}
-			cell.attachChild(new Text(d.cellSize / 2 - textWidth / 2, d.cellSize / 2 - textHeight * 5 / 12, cellFont, cellValue, new TextOptions(CENTER), getVertexBufferObjectManager()));
-		}
 		return cell;
+	}
+
+	@Nonnull
+	private Point newCellPosition(int row, int col) {
+		final float x = col * d.cellSize + (col + 1) * d.cellPadding;
+		final float y = row * d.cellSize + (row + 1) * d.cellPadding;
+		return new Point((int)x, (int)y);
 	}
 
 	@Override
 	public EngineOptions onCreateEngineOptions() {
-		d.calculate(this);
+		d.calculate(this, game);
 		final Camera camera = new Camera(0, 0, d.width, d.height);
 		return new EngineOptions(true, PORTRAIT_FIXED, new RatioResolutionPolicy(d.width, d.height), camera);
 	}
@@ -174,13 +215,14 @@ public class GameActivity extends SimpleBaseGameActivity {
 		private Dimensions() {
 		}
 
-		private void calculate(@Nonnull Activity activity) {
+		private void calculate(@Nonnull Activity activity, @Nonnull Game game) {
 			final Point displaySize = getDisplaySize(activity);
 			width = min(displaySize.x, displaySize.y);
 			height = max(displaySize.x, displaySize.y);
 			calculateBoard();
 			cellPadding = board.width() / 30f;
-			cellSize = (board.width() - (Board.SIZE + 1) * cellPadding) / Board.SIZE;
+			final int size = game.getBoard().getSize();
+			cellSize = (board.width() - (size + 1) * cellPadding) / size;
 			cellTextSize = cellSize * 2 / 3;
 		}
 
@@ -225,41 +267,59 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 			final boolean xVelocityOk = Math.abs(xVelocity) > swipeThresholdVelocity;
 			final boolean yVelocityOk = Math.abs(yVelocity) > swipeThresholdVelocity;
+
+			Direction direction;
 			if (Math.abs(xDiff) > Math.abs(yDiff)) {
-				if(!checkLeftRightSwipes(xDiff, xVelocityOk)) {
+				direction = checkLeftRightSwipes(xDiff, xVelocityOk);
+				if (direction == null) {
 					checkUpDownSwipes(yDiff, yVelocityOk);
 				}
 			} else {
-				if(!checkUpDownSwipes(yDiff, yVelocityOk)) {
+				direction = checkUpDownSwipes(yDiff, yVelocityOk);
+				if (direction == null) {
 					checkLeftRightSwipes(xDiff, xVelocityOk);
 				}
 			}
 
+			if (direction != null) {
+				final List<Game.Change> changes = game.go(direction);
+				for (Game.Change change : changes) {
+					final Point position = newCellPosition(change.to.x, change.to.y);
+					change.cell.getView().setPosition(position.x, position.y);
+				}
+
+				if(!changes.isEmpty()) {
+					final List<Game.Change> newCells = game.prepareNextTurn();
+					for (Game.Change newCell : newCells) {
+						final IEntity boardView = game.getBoard().getView();
+						boardView.attachChild(createValueCell(newCell.to.x, newCell.to.y, newCell.cell));
+					}
+				}
+			}
+
 			return false;
 		}
 
-		private boolean checkLeftRightSwipes(float xDiff, boolean xVelocityOk) {
+		@Nullable
+		private Direction checkLeftRightSwipes(float xDiff, boolean xVelocityOk) {
 			if (xDiff > swipeMinDistance && xVelocityOk) {
-				App.showToast("Right swipe");
-				return true;
+				return Direction.right;
 			} else if (-xDiff > swipeMinDistance && xVelocityOk) {
-				App.showToast("Left swipe");
-				return true;
+				return Direction.left;
 			}
 
-			return false;
+			return null;
 		}
 
-		private boolean checkUpDownSwipes(float yDiff, boolean yVelocityOk) {
+		@Nullable
+		private Direction checkUpDownSwipes(float yDiff, boolean yVelocityOk) {
 			if (-yDiff > swipeMinDistance && yVelocityOk) {
-				App.showToast("Up swipe");
-				return true;
+				return Direction.up;
 			} else if (yDiff > swipeMinDistance && yVelocityOk) {
-				App.showToast("Down swipe");
-				return true;
+				return Direction.down;
 			}
 
-			return false;
+			return null;
 		}
 	}
 }
