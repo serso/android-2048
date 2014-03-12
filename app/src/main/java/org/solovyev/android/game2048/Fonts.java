@@ -21,6 +21,7 @@ public class Fonts {
 
 	@Nonnull
 	Font getFont(float fontSize, int colorResId) {
+		fontSize = Math.max(5, fontSize);
 		SparseArray<Font> fontsBySize = cache.get((int) fontSize);
 
 		Font font = null;
@@ -33,7 +34,7 @@ public class Fonts {
 
 		if (font == null) {
 			final int textureWidth = (int) (10 * fontSize);
-			final int textureHeight = (int) Math.ceil(fontSize);
+			final int textureHeight = (int) (2 * fontSize);
 			font = FontFactory.create(activity.getFontManager(), activity.getTextureManager(), textureWidth, textureHeight, Typeface.create(Typeface.DEFAULT, Typeface.BOLD), fontSize, activity.getColor(colorResId).getARGBPackedInt());
 			font.load();
 			fontsBySize.append(colorResId, font);

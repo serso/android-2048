@@ -12,7 +12,7 @@ import static org.solovyev.android.game2048.Board.newBoard;
 
 public class Game {
 
-	private static final int BOARD_SIZE = 10;
+	private static final int BOARD_SIZE = 6;
 	private static final boolean WITH_WALLS = true;
 
 	@Nonnull
