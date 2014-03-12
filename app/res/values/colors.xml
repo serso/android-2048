@@ -6,6 +6,9 @@
 	<color name="cell_bg">#66eee4da</color>
 	<color name="cell_text">@color/cell_bg</color>
 
+	<color name="cell_wall_bg">#776e65</color>
+	<color name="cell_wall_text">@color/cell_text</color>
+
 	<color name="cell_bg_2">#ffeee4da</color>
 	<color name="cell_text_2">#776e65</color>
 

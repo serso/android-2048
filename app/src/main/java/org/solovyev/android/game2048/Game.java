@@ -12,10 +12,11 @@ import static org.solovyev.android.game2048.Board.newBoard;
 
 public class Game {
 
-	private static final int BOARD_SIZE = 4;
+	private static final int BOARD_SIZE = 10;
+	private static final boolean WITH_WALLS = true;
 
 	@Nonnull
-	private final Board board = newBoard(BOARD_SIZE).reset();
+	private final Board board = newBoard(BOARD_SIZE, WITH_WALLS);
 
 	private Game() {
 	}
@@ -80,22 +81,10 @@ public class Game {
 			return null;
 		}
 		int newRow = row;
-		while (newRow > 0 && !board.cells[newRow - 1][col].hasValue()) {
+		while (newRow > 0 && board.cells[newRow - 1][col].isEmpty()) {
 			newRow--;
 		}
-		return updateBoard(row, col, newRow, col);
-	}
-
-	@Nullable
-	private Change updateBoard(int row, int col, int newRow, int newCol) {
-		if (newRow != row || newCol != col) {
-			final Board.Cell cell = board.cells[row][col];
-			board.cells[row][col] = board.cells[newRow][newCol];
-			board.cells[newRow][newCol] = cell;
-			return new Change(cell, new Point(row, col), new Point(newRow, newCol));
-		} else {
-			return null;
-		}
+		return board.updateBoard(row, col, newRow, col);
 	}
 
 	@Nullable
@@ -105,10 +94,10 @@ public class Game {
 		}
 
 		int newRow = row;
-		while (newRow < board.size - 1 && !board.cells[newRow + 1][col].hasValue()) {
+		while (newRow < board.size - 1 && board.cells[newRow + 1][col].isEmpty()) {
 			newRow++;
 		}
-		return updateBoard(row, col, newRow, col);
+		return board.updateBoard(row, col, newRow, col);
 	}
 
 	@Nullable
@@ -118,10 +107,10 @@ public class Game {
 		}
 
 		int newCol = col;
-		while (newCol < board.size - 1 && !board.cells[row][newCol + 1].hasValue()) {
+		while (newCol < board.size - 1 && board.cells[row][newCol + 1].isEmpty()) {
 			newCol++;
 		}
-		return updateBoard(row, col, row, newCol);
+		return board.updateBoard(row, col, row, newCol);
 	}
 
 	@Nullable
@@ -130,25 +119,27 @@ public class Game {
 			return null;
 		}
 		int newCol = col;
-		while (newCol > 0 && !board.cells[row][newCol - 1].hasValue()) {
+		while (newCol > 0 && board.cells[row][newCol - 1].isEmpty()) {
 			newCol--;
 		}
-		return updateBoard(row, col, row, newCol);
+		return board.updateBoard(row, col, row, newCol);
 	}
 
 	@Nonnull
 	public List<Change> prepareNextTurn() {
-		return board.addNewRandomPoint();
+		return board.addNewRandomCell();
 	}
 
 	public static final class Change {
+
+		@Nonnull
 		public final Board.Cell cell;
 
 		@Nonnull
-		public final Point from;
+		public Point from;
 
 		@Nonnull
-		public final Point to;
+		public Point to;
 
 		public Change(Board.Cell cell, @Nonnull Point from, @Nonnull Point to) {
 			this.cell = cell;

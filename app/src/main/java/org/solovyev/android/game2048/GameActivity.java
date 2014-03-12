@@ -28,8 +28,6 @@ import org.andengine.opengl.font.FontUtils;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
 import org.andengine.util.color.Color;
 import org.andengine.util.modifier.IModifier;
-import org.andengine.util.modifier.ease.EaseBounceIn;
-import org.andengine.util.modifier.ease.EaseBounceOut;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -51,6 +49,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 	private final CellStyle lastCellStyle = newCellStyle(2048, R.color.cell_text_2048, R.color.cell_bg_2048);
 
 	{
+		cellStyles.append(-1, newCellStyle(0, R.color.cell_wall_text, R.color.cell_wall_bg));
 		cellStyles.append(0, newCellStyle(0, R.color.cell_text, R.color.cell_bg));
 		cellStyles.append(2, newCellStyle(2, R.color.cell_text_2, R.color.cell_bg_2));
 		cellStyles.append(4, newCellStyle(4, R.color.cell_text_4, R.color.cell_bg_4));
@@ -124,7 +123,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 		final int size = board.getSize();
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
-				boardView.attachChild(createEmptyCell(i, j));
+				boardView.attachChild(createNotValueCell(i, j));
 			}
 		}
 
@@ -190,8 +189,16 @@ public class GameActivity extends SimpleBaseGameActivity {
 	}
 
 	@Nonnull
-	private IEntity createEmptyCell(int i, int j) {
-		return createCell(i, j);
+	private IEntity createNotValueCell(int i, int j) {
+		final Board.Cell c = game.getBoard().getCell(i, j);
+		if (c.isWall()) {
+			final Rectangle cell = createCell(i, j);
+			final CellStyle cellStyle = cellStyles.get(c.getValue(), lastCellStyle);
+			cell.setColor(getColor(cellStyle.getBgColorResId()));
+			return cell;
+		} else {
+			return createCell(i, j);
+		}
 	}
 
 	private Rectangle createCell(int i, int j) {
