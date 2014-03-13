@@ -2,6 +2,7 @@ package org.solovyev.android.games.game2048;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build;
@@ -42,6 +43,7 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static org.andengine.engine.options.ScreenOrientation.PORTRAIT_FIXED;
 import static org.andengine.util.HorizontalAlign.CENTER;
+import static org.solovyev.android.Activities.restartActivity;
 import static org.solovyev.android.games.game2048.CellStyle.newCellStyle;
 
 public class GameActivity extends SimpleBaseGameActivity {
@@ -453,7 +455,15 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 	private void restartGame() {
 		game.reset();
-		Activities.restartActivity(this);
+		restartActivity(this);
+	}
+
+	private void shareScore() {
+		final Intent shareIntent = new Intent();
+		shareIntent.setAction(Intent.ACTION_SEND);
+		shareIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_message, game.getScore().getPoints(), App.SHARE_URL));
+		shareIntent.setType("text/plain");
+		startActivity(shareIntent);
 	}
 
 	/*
@@ -474,6 +484,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 		if (this.menu == null) {
 			final List<IdentifiableMenuItem<MenuItem>> items = new ArrayList<IdentifiableMenuItem<MenuItem>>();
 			items.add(new RestartMenuItem());
+			items.add(new ShareMenuItem());
 			this.menu = ListActivityMenu.fromResource(R.menu.menu, items, AndroidMenuHelper.getInstance());
 		}
 		return this.menu.onCreateOptionsMenu(this, menu);
@@ -498,6 +509,23 @@ public class GameActivity extends SimpleBaseGameActivity {
 		@Override
 		public void onClick(@Nonnull MenuItem data, @Nonnull Context context) {
 			restartGame();
+		}
+	}
+
+	public class ShareMenuItem implements IdentifiableMenuItem<MenuItem> {
+
+		public ShareMenuItem() {
+		}
+
+		@Nonnull
+		@Override
+		public Integer getItemId() {
+			return R.id.menu_share;
+		}
+
+		@Override
+		public void onClick(@Nonnull MenuItem data, @Nonnull Context context) {
+			shareScore();
 		}
 	}
 }

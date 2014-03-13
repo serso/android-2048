@@ -17,6 +17,9 @@ public final class App {
 	public static final String TAG = "2048+";
 
 	@Nonnull
+	public static final String SHARE_URL = "https://play.google.com/store/apps/details?id=org.solovyev.android.games.game2048";
+
+	@Nonnull
 	private static App instance = new App();
 
 	@Nonnull

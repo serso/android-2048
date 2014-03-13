@@ -6,4 +6,6 @@
 	<string name="unable_to_save_game">Не удалось сохранить игру</string>
 	<string name="rules">Проведите пальцем для того, чтобы сдвинуть плитки. Когда две плитки с одним числом соприкасаются, они объединяются в одну!</string>
 	<string name="restart">Начать сначала</string>
+	<string name="share">Поделиться</string>
+	<string name="share_message">Я набрал %1$d очков в 2048! Можешь побить мой рекорд? Попробуй: %2$s</string>
 </resources>

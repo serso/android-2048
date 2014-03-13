@@ -6,4 +6,6 @@
 	<string name="unable_to_save_game">Unable to save game</string>
 	<string name="rules">Swipe to move the tiles. When two tiles with the same number touch, they merge into one!</string>
 	<string name="restart">Restart game</string>
+	<string name="share">Share</string>
+	<string name="share_message">I\'ve scored %1$d in 2048! Can you beat me? Try: %2$s</string>
 </resources>
