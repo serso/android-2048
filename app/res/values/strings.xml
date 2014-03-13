@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name">2048+</string>
+	<string name="score">Score: %1$d</string>
+	<string name="unable_to_load_game">Unable to load game</string>
+	<string name="unable_to_save_game">Unable to save game</string>
+	<string name="rules">Swipe to move the tiles.\nWhen two tiles with the same number touch, they merge into one!</string>
+</resources>

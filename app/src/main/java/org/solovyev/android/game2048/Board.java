@@ -146,13 +146,13 @@ public class Board {
 	}
 
 	@Nonnull
-	public List<CellChange.New> prepareNextTurn() {
+	public List<CellChange.New> prepareNextTurn(@Nonnull Difficulty difficulty) {
 		for (int i = 0; i < cells.length; i++) {
 			for (int j = 0; j < cells[i].length; j++) {
 				cells[i][j].unmerge();
 			}
 		}
-		return addNewRandomCell();
+		return addNewRandomCells(difficulty.getNewCellCount(size));
 	}
 
 	@Nonnull

@@ -22,6 +22,7 @@ import org.andengine.entity.modifier.ScaleModifier;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
+import org.andengine.entity.text.AutoWrap;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
 import org.andengine.entity.util.FPSLogger;
@@ -41,6 +42,7 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static org.andengine.engine.options.ScreenOrientation.PORTRAIT_FIXED;
 import static org.andengine.util.HorizontalAlign.CENTER;
+import static org.andengine.util.HorizontalAlign.LEFT;
 import static org.solovyev.android.game2048.CellStyle.newCellStyle;
 
 public class GameActivity extends SimpleBaseGameActivity {
@@ -84,11 +86,15 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 	private boolean animating = false;
 
+	@Nonnull
+	private Text scoreText;
+
 	@Override
 	protected void onCreateResources() {
 		for (int i = 0; i < cellStyles.size(); i++) {
 			cellStyles.valueAt(i).loadFont(this, d.cellTextSize);
 		}
+
 	}
 
 	@Nonnull
@@ -118,7 +124,22 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 		final Scene scene = new Scene();
 		scene.setBackground(new Background(getColor(R.color.bg)));
+
+		final String appName = getString(R.string.app_name);
+		final Font titleFont = getFonts().getFont(d.titleSize, R.color.text, appName.length(), true);
+		scene.attachChild(new Text(d.title.x, d.title.y, titleFont, appName, getVertexBufferObjectManager()));
+
+		final String score = getString(R.string.score);
+		final Font scoreFont = getFonts().getFont(d.textSize, R.color.text, 20);
+		scoreText = new Text(d.score.x, d.score.y, scoreFont, score, getVertexBufferObjectManager());
+		scoreText.setText(getString(R.string.score, game.getScore().getPoints()));
+		scene.attachChild(scoreText);
+
 		scene.attachChild(createBoard());
+
+		final String rules = getString(R.string.rules);
+		final Font textFont = getFonts().getFont(d.rulesSize, R.color.text,  30);
+		scene.attachChild(new Text(d.rules.x, d.rules.y, textFont, rules, new TextOptions(AutoWrap.WORDS, d.board.width()), getVertexBufferObjectManager()));
 
 		return scene;
 	}
@@ -246,6 +267,14 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 	private static final class Dimensions {
 
+		private float titleSize;
+		private float textSize;
+		private float rulesSize;
+		private Point title = new Point();
+		private Point score = new Point();
+		private Point rules = new Point();
+		private float padding;
+		private float textPadding;
 		private final Rect board = new Rect();
 		private float cellPadding;
 		private float cellSize;
@@ -260,17 +289,29 @@ public class GameActivity extends SimpleBaseGameActivity {
 			final Point displaySize = getDisplaySize(activity);
 			width = min(displaySize.x, displaySize.y);
 			height = max(displaySize.x, displaySize.y);
+			titleSize = 0.08f * height;
+			textSize = titleSize / 2;
+			rulesSize = textSize * 3 / 4;
+			padding = titleSize;
+			textPadding = textSize;
+			title.y = (int) textPadding;
+			score.y = (int) (title.y + textPadding + titleSize);
 			calculateBoard();
 			final int size = game.getBoard().getSize();
 			cellPadding = 0.15f * board.width() / size;
 			cellSize = (board.width() - (size + 1) * cellPadding) / size;
 			cellTextSize = cellSize * 2 / 3;
+			title.x = board.left;
+			score.x = board.left;
+			rules.x = board.left;
+			rules.y = (int) (board.bottom + textPadding);
 		}
 
 		private float calculateBoard() {
-			final float boardSize = min(width, height) * 5f / 6f;
+			final float desiredSize = min(width, height) * 5f / 6f;
+			final float boardSize = min(desiredSize, height / 2);
 			board.left = (int) (width / 2 - boardSize / 2);
-			board.top = (int) (height / 2 - boardSize / 2);
+			board.top = (int) (score.y + textSize + textPadding);
 			board.right = (int) (board.left + boardSize);
 			board.bottom = (int) (board.top + boardSize);
 			return boardSize;
@@ -389,6 +430,8 @@ public class GameActivity extends SimpleBaseGameActivity {
 					@Override
 					public void run() {
 						final IEntity boardView = game.getBoard().getView();
+
+						scoreText.setText(getString(R.string.score, game.getScore().getPoints()));
 
 						for (CellChange.Move.Merge merge : merges) {
 							boardView.detachChild(merge.cell.getView());

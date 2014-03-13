@@ -21,23 +21,51 @@ public class Fonts {
 
 	@Nonnull
 	Font getFont(float fontSize, int colorResId) {
+		return getFont(fontSize, colorResId, 5, true, true);
+	}
+
+	@Nonnull
+	Font getFont(float fontSize, int colorResId, int textSize) {
+		return getFont(fontSize, colorResId, textSize, false, false);
+	}
+
+	@Nonnull
+	Font getFont(float fontSize, int colorResId, int textSize, boolean bold) {
+		return getFont(fontSize, colorResId, textSize, false, bold);
+	}
+
+	@Nonnull
+	private Font getFont(float fontSize, int colorResId, int textSize, boolean shouldCache, boolean bold) {
 		fontSize = Math.max(5, fontSize);
-		SparseArray<Font> fontsBySize = cache.get((int) fontSize);
+		SparseArray<Font> fontsBySize = null;
+		if (shouldCache) {
+			fontsBySize = cache.get((int) fontSize);
+		}
 
 		Font font = null;
-		if (fontsBySize != null) {
-			font = fontsBySize.get(colorResId);
-		} else {
-			fontsBySize = new SparseArray<Font>();
-			cache.append((int) fontSize, fontsBySize);
+		if (shouldCache) {
+			if (fontsBySize != null) {
+				font = fontsBySize.get(colorResId);
+			} else {
+				fontsBySize = new SparseArray<Font>();
+				cache.append((int) fontSize, fontsBySize);
+			}
 		}
 
 		if (font == null) {
-			final int textureWidth = (int) (10 * fontSize);
+			final int textureWidth = (int) (2 * textSize * fontSize);
 			final int textureHeight = (int) (2 * fontSize);
-			font = FontFactory.create(activity.getFontManager(), activity.getTextureManager(), textureWidth, textureHeight, Typeface.create(Typeface.DEFAULT, Typeface.BOLD), fontSize, activity.getColor(colorResId).getARGBPackedInt());
+			final Typeface typeface;
+			if (bold) {
+				typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD);
+			} else {
+				typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL);
+			}
+			font = FontFactory.create(activity.getFontManager(), activity.getTextureManager(), textureWidth, textureHeight, typeface, fontSize, activity.getColor(colorResId).getARGBPackedInt());
 			font.load();
-			fontsBySize.append(colorResId, font);
+			if (shouldCache) {
+				fontsBySize.append(colorResId, font);
+			}
 		}
 
 		return font;

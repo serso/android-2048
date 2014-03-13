@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<color name="bg">#fffaf8ef</color>
+	<color name="text">#776e65</color>
 	<color name="board_bg">#ffbbada0</color>
 
 	<color name="cell_bg">#66eee4da</color>
@@ -10,10 +11,10 @@
 	<color name="cell_wall_text">@color/cell_text</color>
 
 	<color name="cell_bg_2">#ffeee4da</color>
-	<color name="cell_text_2">#776e65</color>
+	<color name="cell_text_2">@color/text</color>
 
 	<color name="cell_bg_4">#ffede0c8</color>
-	<color name="cell_text_4">@color/cell_text_2</color>
+	<color name="cell_text_4">@color/text</color>
 
 	<color name="cell_bg_8">#fff2b179</color>
 	<color name="cell_text_8">#fff9f6f2</color>

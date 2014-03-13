@@ -11,16 +11,27 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.solovyev.android.game2048.App.showToast;
 import static org.solovyev.android.game2048.Board.newBoard;
+import static org.solovyev.android.game2048.Score.newScore;
 
 public class Game {
 
 	private static final int BOARD_SIZE = 6;
 	private static final boolean WITH_WALLS = true;
+
 	private static final String JSON_BOARD = "board";
+	private static final String JSON_SCORE = "score";
+	private static final String JSON_DIFFICULTY = "difficulty";
 
 	@Nonnull
 	private Board board = newBoard(BOARD_SIZE, WITH_WALLS);
+
+	@Nonnull
+	private Score score = newScore();
+
+	@Nonnull
+	private Difficulty difficulty = Difficulty.normal;
 
 	private boolean stateLoaded = false;
 
@@ -35,6 +46,11 @@ public class Game {
 	@Nonnull
 	public Board getBoard() {
 		return board;
+	}
+
+	@Nonnull
+	public Score getScore() {
+		return score;
 	}
 
 	@Nonnull
@@ -71,6 +87,8 @@ public class Game {
 				}
 				break;
 		}
+
+		score.onMoveChanged(changes);
 
 		return changes;
 	}
@@ -165,19 +183,21 @@ public class Game {
 
 	@Nonnull
 	public List<CellChange.New> prepareNextTurn() {
-		return board.prepareNextTurn();
+		return board.prepareNextTurn(difficulty);
 	}
 
 	@Nullable
 	public String saveState() {
 		try {
 			final JSONObject json = new JSONObject();
+			json.put(JSON_DIFFICULTY, difficulty.name());
 			json.put(JSON_BOARD, board.toJson());
+			json.put(JSON_SCORE, score.toJson());
 			return json.toString();
 		} catch (RuntimeException e) {
-			Log.e(App.TAG, e.getMessage(), e);
+			onSaveLoadException(e, R.string.unable_to_save_game);
 		} catch (JSONException e) {
-			Log.e(App.TAG, e.getMessage(), e);
+			onSaveLoadException(e, R.string.unable_to_save_game);
 		}
 
 		return null;
@@ -187,15 +207,26 @@ public class Game {
 		try {
 			if (!Strings.isEmpty(state)) {
 				final JSONObject json = new JSONObject(state);
-				this.board = Board.fromJson(json.getJSONObject(JSON_BOARD));
+				final Difficulty difficulty = Difficulty.valueOf(json.getString(JSON_DIFFICULTY));
+				final Board board = Board.fromJson(json.getJSONObject(JSON_BOARD));
+				final Score score = Score.fromJson(json.getJSONObject(JSON_SCORE));
+
+				this.difficulty = difficulty;
+				this.board = board;
+				this.score = score;
 			}
 		} catch (RuntimeException e) {
-			Log.e(App.TAG, e.getMessage(), e);
+			onSaveLoadException(e, R.string.unable_to_load_game);
 		} catch (JSONException e) {
-			Log.e(App.TAG, e.getMessage(), e);
+			onSaveLoadException(e, R.string.unable_to_load_game);
 		}
 
 		stateLoaded = true;
+	}
+
+	private void onSaveLoadException(@Nonnull Exception e, int messageResId) {
+		showToast(messageResId);
+		Log.e(App.TAG, e.getMessage(), e);
 	}
 
 	public boolean isStateLoaded() {
