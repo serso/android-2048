@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="org.solovyev.android.game2048"
+	package="org.solovyev.android.games.game2048"
 	android:installLocation="auto"
 	android:versionCode="1"
 	android:versionName="0.01">
@@ -31,7 +31,7 @@
 
 	<uses-sdk
 		android:minSdkVersion="9"
-		android:targetSdkVersion="19" />
+		android:targetSdkVersion="10" />
 
 	<application
 		android:name=".GameApplication"

@@ -1,4 +1,4 @@
-package org.solovyev.android.game2048;
+package org.solovyev.android.games.game2048;
 
 import android.util.Log;
 import org.json.JSONException;
@@ -11,9 +11,9 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.solovyev.android.game2048.App.showToast;
-import static org.solovyev.android.game2048.Board.newBoard;
-import static org.solovyev.android.game2048.Score.newScore;
+import static org.solovyev.android.games.game2048.App.showToast;
+import static org.solovyev.android.games.game2048.Board.newBoard;
+import static org.solovyev.android.games.game2048.Score.newScore;
 
 public class Game {
 

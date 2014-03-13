@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.solovyev.android.game2048</groupId>
+	<groupId>org.solovyev.android.games.game2048</groupId>
 	<artifactId>android-game2048</artifactId>
 	<version>0.01</version>
 	<name>Android 2048 Game</name>
@@ -79,14 +79,14 @@
 			<!-- OWN -->
 
 			<dependency>
-				<groupId>org.solovyev.android.game2048</groupId>
+				<groupId>org.solovyev.android.games.game2048</groupId>
 				<artifactId>android-game2048-app</artifactId>
 				<version>0.01</version>
 				<type>apk</type>
 			</dependency>
 
 			<dependency>
-				<groupId>org.solovyev.android.game2048</groupId>
+				<groupId>org.solovyev.android.games.game2048</groupId>
 				<artifactId>android-game2048-app</artifactId>
 				<version>0.01</version>
 				<type>jar</type>

@@ -1,4 +1,4 @@
-package org.solovyev.android.game2048;
+package org.solovyev.android.games.game2048;
 
 import android.app.Application;
 import android.content.SharedPreferences;

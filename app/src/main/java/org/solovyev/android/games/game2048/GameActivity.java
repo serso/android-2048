@@ -1,4 +1,4 @@
-package org.solovyev.android.game2048;
+package org.solovyev.android.games.game2048;
 
 import android.app.Activity;
 import android.content.Context;
@@ -35,7 +35,6 @@ import org.solovyev.android.prefs.StringPreference;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +42,7 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static org.andengine.engine.options.ScreenOrientation.PORTRAIT_FIXED;
 import static org.andengine.util.HorizontalAlign.CENTER;
-import static org.solovyev.android.game2048.CellStyle.newCellStyle;
+import static org.solovyev.android.games.game2048.CellStyle.newCellStyle;
 
 public class GameActivity extends SimpleBaseGameActivity {
 
