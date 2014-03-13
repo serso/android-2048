@@ -4,7 +4,7 @@
 
 	<groupId>org.solovyev.android.games.game2048</groupId>
 	<artifactId>android-game2048</artifactId>
-	<version>0.02</version>
+	<version>0.03</version>
 	<name>Android 2048 Game</name>
 	<url>https://oss.sonatype.org/content/repositories/releases/org/solovyev/android/2048</url>
 
@@ -81,14 +81,14 @@
 			<dependency>
 				<groupId>org.solovyev.android.games.game2048</groupId>
 				<artifactId>android-game2048-app</artifactId>
-				<version>0.02</version>
+				<version>0.03</version>
 				<type>apk</type>
 			</dependency>
 
 			<dependency>
 				<groupId>org.solovyev.android.games.game2048</groupId>
 				<artifactId>android-game2048-app</artifactId>
-				<version>0.02</version>
+				<version>0.03</version>
 				<type>jar</type>
 			</dependency>
 
