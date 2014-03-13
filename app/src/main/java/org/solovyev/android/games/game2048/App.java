@@ -14,7 +14,7 @@ import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 public final class App {
 
 	@Nonnull
-	public static final String TAG = "2048";
+	public static final String TAG = "2048+";
 
 	@Nonnull
 	private static App instance = new App();
