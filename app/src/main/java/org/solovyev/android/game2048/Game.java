@@ -207,13 +207,17 @@ public class Game {
 		try {
 			if (!Strings.isEmpty(state)) {
 				final JSONObject json = new JSONObject(state);
-				final Difficulty difficulty = Difficulty.valueOf(json.getString(JSON_DIFFICULTY));
-				final Board board = Board.fromJson(json.getJSONObject(JSON_BOARD));
-				final Score score = Score.fromJson(json.getJSONObject(JSON_SCORE));
+				if (json.has(JSON_DIFFICULTY) &&
+						json.has(JSON_BOARD) &&
+						json.has(JSON_SCORE)) {
+					final Difficulty difficulty = Difficulty.valueOf(json.getString(JSON_DIFFICULTY));
+					final Board board = Board.fromJson(json.getJSONObject(JSON_BOARD));
+					final Score score = Score.fromJson(json.getJSONObject(JSON_SCORE));
 
-				this.difficulty = difficulty;
-				this.board = board;
-				this.score = score;
+					this.difficulty = difficulty;
+					this.board = board;
+					this.score = score;
+				}
 			}
 		} catch (RuntimeException e) {
 			onSaveLoadException(e, R.string.unable_to_load_game);
