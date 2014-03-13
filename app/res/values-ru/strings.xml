@@ -4,5 +4,5 @@
 	<string name="score">Очки: %1$d</string>
 	<string name="unable_to_load_game">Не удалось загрузить игру</string>
 	<string name="unable_to_save_game">Не удалось сохранить игру</string>
-	<string name="rules">Проведите пальцем чтобы сдвинуть плитки.\nКогда две плитки с одним числом соприкасаются, они объединяются в одну!</string>
+	<string name="rules">Проведите пальцем для того, чтобы сдвинуть плитки. Когда две плитки с одним числом соприкасаются, они объединяются в одну!</string>
 </resources>
