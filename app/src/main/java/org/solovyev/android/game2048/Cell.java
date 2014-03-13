@@ -31,6 +31,11 @@ public final class Cell {
 		return new Cell(NO_VALUE);
 	}
 
+	@Nonnull
+	public static Cell newCell(int value) {
+		return new Cell(value);
+	}
+
 	public int getValue() {
 		return value;
 	}
