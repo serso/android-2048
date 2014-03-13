@@ -59,6 +59,13 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.solovyev.android</groupId>
+			<artifactId>android-common-menus</artifactId>
+			<type>apklib</type>
+		</dependency>
+
+
+		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 		</dependency>

@@ -236,4 +236,9 @@ public class Game {
 	public boolean isStateLoaded() {
 		return stateLoaded;
 	}
+
+	public void reset() {
+		this.board = newBoard(BOARD_SIZE, WITH_WALLS);
+		this.score = newScore();
+	}
 }

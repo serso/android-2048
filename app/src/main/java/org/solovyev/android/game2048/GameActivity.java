@@ -1,16 +1,14 @@
 package org.solovyev.android.game2048;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
-import android.view.Display;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
-import android.view.ViewConfiguration;
+import android.view.*;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
@@ -31,10 +29,13 @@ import org.andengine.opengl.font.FontUtils;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
 import org.andengine.util.color.Color;
 import org.andengine.util.modifier.IModifier;
+import org.solovyev.android.Activities;
+import org.solovyev.android.menu.*;
 import org.solovyev.android.prefs.StringPreference;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +43,6 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static org.andengine.engine.options.ScreenOrientation.PORTRAIT_FIXED;
 import static org.andengine.util.HorizontalAlign.CENTER;
-import static org.andengine.util.HorizontalAlign.LEFT;
 import static org.solovyev.android.game2048.CellStyle.newCellStyle;
 
 public class GameActivity extends SimpleBaseGameActivity {
@@ -86,6 +86,9 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 	private boolean animating = false;
 
+	@Nullable
+	private ActivityMenu<Menu, MenuItem> menu;
+
 	@Nonnull
 	private Text scoreText;
 
@@ -94,7 +97,6 @@ public class GameActivity extends SimpleBaseGameActivity {
 		for (int i = 0; i < cellStyles.size(); i++) {
 			cellStyles.valueAt(i).loadFont(this, d.cellTextSize);
 		}
-
 	}
 
 	@Nonnull
@@ -447,6 +449,56 @@ public class GameActivity extends SimpleBaseGameActivity {
 				});
 				animating = false;
 			}
+		}
+	}
+
+	private void restartGame() {
+		game.reset();
+		Activities.restartActivity(this);
+	}
+
+	/*
+    **********************************************************************
+    *
+    *                           MENU
+    *
+    **********************************************************************
+    */
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		return this.menu.onPrepareOptionsMenu(this, menu);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(final Menu menu) {
+		if (this.menu == null) {
+			final List<IdentifiableMenuItem<MenuItem>> items = new ArrayList<IdentifiableMenuItem<MenuItem>>();
+			items.add(new RestartMenuItem());
+			this.menu = ListActivityMenu.fromResource(R.menu.menu, items, AndroidMenuHelper.getInstance());
+		}
+		return this.menu.onCreateOptionsMenu(this, menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		return this.menu.onOptionsItemSelected(this, item);
+	}
+
+	public class RestartMenuItem implements IdentifiableMenuItem<MenuItem> {
+
+		public RestartMenuItem() {
+		}
+
+		@Nonnull
+		@Override
+		public Integer getItemId() {
+			return R.id.menu_restart;
+		}
+
+		@Override
+		public void onClick(@Nonnull MenuItem data, @Nonnull Context context) {
+			restartGame();
 		}
 	}
 }

@@ -5,4 +5,5 @@
 	<string name="unable_to_load_game">Unable to load game</string>
 	<string name="unable_to_save_game">Unable to save game</string>
 	<string name="rules">Swipe to move the tiles. When two tiles with the same number touch, they merge into one!</string>
+	<string name="restart">Restart game</string>
 </resources>

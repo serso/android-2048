@@ -191,6 +191,13 @@
 
 			<dependency>
 				<groupId>org.solovyev.android</groupId>
+				<artifactId>android-common-menus</artifactId>
+				<version>${acl.version}</version>
+				<type>apklib</type>
+			</dependency>
+
+			<dependency>
+				<groupId>org.solovyev.android</groupId>
 				<artifactId>android-common-tasks</artifactId>
 				<version>${acl.version}</version>
 				<type>apklib</type>
