@@ -28,7 +28,6 @@ public class Board {
 	final Cell[][] cells;
 	final int size;
 
-	@Nonnull
 	private IEntity view;
 
 	private Board(int size) {
@@ -193,6 +192,15 @@ public class Board {
 			i++;
 		}
 		return board;
+	}
+
+	public void releaseViews() {
+		view = null;
+		for (int i = 0; i < cells.length; i++) {
+			for (int j = 0; j < cells[i].length; j++) {
+				cells[i][j].releaseView();
+			}
+		}
 	}
 
 	public static final class EmptyCell {

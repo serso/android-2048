@@ -1,8 +1,10 @@
 package org.solovyev.android.games.game2048;
 
+import android.content.SharedPreferences;
 import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.solovyev.android.prefs.StringPreference;
 import org.solovyev.common.text.Strings;
 
 import javax.annotation.Nonnull;
@@ -17,6 +19,9 @@ import static org.solovyev.android.games.game2048.Score.newScore;
 
 public class Game {
 
+	@Nonnull
+	private static final StringPreference<String> state = StringPreference.of("state", null);
+
 	private static final int BOARD_SIZE = 6;
 	private static final boolean WITH_WALLS = true;
 
@@ -25,22 +30,33 @@ public class Game {
 	private static final String JSON_DIFFICULTY = "difficulty";
 
 	@Nonnull
-	private Board board = newBoard(BOARD_SIZE, WITH_WALLS);
+	private Board board;
 
 	@Nonnull
-	private Score score = newScore();
+	private Score score;
 
 	@Nonnull
 	private Difficulty difficulty = Difficulty.normal;
 
-	private boolean stateLoaded = false;
-
-	private Game() {
+	private Game(@Nonnull Board board, @Nonnull Score score) {
+		this.board = board;
+		this.score = score;
 	}
 
 	@Nonnull
-	public static Game newGame() {
-		return new Game();
+	private static Game newGame() {
+		return new Game(newBoard(BOARD_SIZE, WITH_WALLS), newScore());
+	}
+
+	@Nonnull
+	public static Game newFromSave(@Nonnull SharedPreferences preferences) {
+		return newFromSave(state.getPreference(preferences));
+	}
+
+	@Nonnull
+	public static Game newFromSave(@Nullable String state) {
+		final Game game = fromJson(state);
+		return game == null ? newGame() : game;
 	}
 
 	@Nonnull
@@ -187,7 +203,7 @@ public class Game {
 	}
 
 	@Nullable
-	public String saveState() {
+	private String toJson() {
 		try {
 			final JSONObject json = new JSONObject();
 			json.put(JSON_DIFFICULTY, difficulty.name());
@@ -203,7 +219,8 @@ public class Game {
 		return null;
 	}
 
-	public void loadState(@Nullable String state) {
+	@Nullable
+	private static Game fromJson(@Nullable String state) {
 		try {
 			if (!Strings.isEmpty(state)) {
 				final JSONObject json = new JSONObject(state);
@@ -214,9 +231,7 @@ public class Game {
 					final Board board = Board.fromJson(json.getJSONObject(JSON_BOARD));
 					final Score score = Score.fromJson(json.getJSONObject(JSON_SCORE));
 
-					this.difficulty = difficulty;
-					this.board = board;
-					this.score = score;
+					return new Game(board, score);
 				}
 			}
 		} catch (RuntimeException e) {
@@ -225,20 +240,24 @@ public class Game {
 			onSaveLoadException(e, R.string.unable_to_load_game);
 		}
 
-		stateLoaded = true;
+		return null;
 	}
 
-	private void onSaveLoadException(@Nonnull Exception e, int messageResId) {
+	private static void onSaveLoadException(@Nonnull Exception e, int messageResId) {
 		showToast(messageResId);
 		Log.e(App.TAG, e.getMessage(), e);
-	}
-
-	public boolean isStateLoaded() {
-		return stateLoaded;
 	}
 
 	public void reset() {
 		this.board = newBoard(BOARD_SIZE, WITH_WALLS);
 		this.score = newScore();
+	}
+
+	public void save(@Nonnull SharedPreferences preferences) {
+		state.putPreference(preferences, toJson());
+	}
+
+	public void releaseViews() {
+		board.releaseViews();
 	}
 }

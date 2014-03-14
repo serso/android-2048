@@ -14,7 +14,6 @@ public final class Cell {
 
 	private boolean merged = false;
 
-	@Nonnull
 	private IEntity view;
 
 	private Cell(int value) {
@@ -59,6 +58,10 @@ public final class Cell {
 	@Nonnull
 	public IEntity getView() {
 		return view;
+	}
+
+	public void releaseView() {
+		view = null;
 	}
 
 	public boolean isWall() {

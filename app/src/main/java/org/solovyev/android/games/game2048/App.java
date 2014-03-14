@@ -31,6 +31,9 @@ public final class App {
 	@Nonnull
 	private Handler uiHandler;
 
+	@Nonnull
+	private Game game;
+
 	private App() {
 	}
 
@@ -38,6 +41,7 @@ public final class App {
 		this.application = application;
 		this.preferences = getDefaultSharedPreferences(application);
 		this.uiHandler = Threads.newUiHandler();
+		this.game = Game.newFromSave(App.getPreferences());
 	}
 
 	public static void showToast(final int textResId) {
@@ -93,5 +97,10 @@ public final class App {
 	@Nonnull
 	public static Handler getUiHandler() {
 		return instance.uiHandler;
+	}
+
+	@Nonnull
+	public static Game getGame() {
+		return instance.game;
 	}
 }

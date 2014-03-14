@@ -30,9 +30,7 @@ import org.andengine.opengl.font.FontUtils;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
 import org.andengine.util.color.Color;
 import org.andengine.util.modifier.IModifier;
-import org.solovyev.android.Activities;
 import org.solovyev.android.menu.*;
-import org.solovyev.android.prefs.StringPreference;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -47,9 +45,6 @@ import static org.solovyev.android.Activities.restartActivity;
 import static org.solovyev.android.games.game2048.CellStyle.newCellStyle;
 
 public class GameActivity extends SimpleBaseGameActivity {
-
-	@Nonnull
-	private final StringPreference<String> state = StringPreference.of("state", null);
 
 	@Nonnull
 	private final SparseArray<CellStyle> cellStyles = new SparseArray<CellStyle>();
@@ -77,9 +72,6 @@ public class GameActivity extends SimpleBaseGameActivity {
 	private final Dimensions d = new Dimensions();
 
 	@Nonnull
-	private final Game game = Game.newGame();
-
-	@Nonnull
 	private final Fonts fonts = new Fonts(this);
 
 	@Nonnull
@@ -92,6 +84,9 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 	@Nonnull
 	private Text scoreText;
+
+	@Nonnull
+	private Game game;
 
 	@Override
 	protected void onCreateResources() {
@@ -107,6 +102,10 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		game = App.getGame();
+		// as game is shared between activities we need to cleanup all views attached to the objects
+		game.releaseViews();
+
 		super.onCreate(savedInstanceState);
 		gestureDetector = new GestureDetector(this, new GestureListener());
 	}
@@ -122,8 +121,6 @@ public class GameActivity extends SimpleBaseGameActivity {
 	@Override
 	protected Scene onCreateScene() {
 		this.mEngine.registerUpdateHandler(new FPSLogger());
-
-		game.loadState(state.getPreference(App.getPreferences()));
 
 		final Scene scene = new Scene();
 		scene.setBackground(new Background(getColor(R.color.bg)));
@@ -174,7 +171,6 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 		return boardView;
 	}
-
 
 	@Nullable
 	private IEntity createValueCell(int i, int j) {
@@ -262,9 +258,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 	@Override
 	protected void onPause() {
-		if (game.isStateLoaded()) {
-			state.putPreference(App.getPreferences(), game.saveState());
-		}
+		game.save(App.getPreferences());
 		super.onPause();
 	}
 
