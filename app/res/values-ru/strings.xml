@@ -2,10 +2,12 @@
 <resources>
 	<string name="app_name">2048+</string>
 	<string name="score">Очки: %1$d</string>
+	<string name="score_with_highscore">Очки: %1$d/%2$d</string>
 	<string name="unable_to_load_game">Не удалось загрузить игру</string>
 	<string name="unable_to_save_game">Не удалось сохранить игру</string>
 	<string name="rules">Проведите пальцем для того, чтобы сдвинуть плитки. Когда две плитки с одним числом соприкасаются, они объединяются в одну!</string>
 	<string name="restart">Начать сначала</string>
 	<string name="share">Поделиться</string>
 	<string name="share_message">Я набрал %1$d очков в 2048! Можешь побить мой рекорд? Попробуй: %2$s</string>
+	<string name="high_scores">Рекорды</string>
 </resources>

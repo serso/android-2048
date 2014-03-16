@@ -45,6 +45,10 @@ public class Score {
 		}
 	}
 
+	public boolean hasPoints() {
+		return points > 0;
+	}
+
 	public int getPoints() {
 		return points;
 	}

@@ -34,6 +34,9 @@ public final class App {
 	@Nonnull
 	private Game game;
 
+	@Nonnull
+	private HighScores highScores;
+
 	private App() {
 	}
 
@@ -41,7 +44,8 @@ public final class App {
 		this.application = application;
 		this.preferences = getDefaultSharedPreferences(application);
 		this.uiHandler = Threads.newUiHandler();
-		this.game = Game.newFromSave(App.getPreferences());
+		this.game = Game.newFromSave(this.preferences);
+		this.highScores = HighScores.newFromPreferences(this.preferences);
 	}
 
 	public static void showToast(final int textResId) {
@@ -102,5 +106,10 @@ public final class App {
 	@Nonnull
 	public static Game getGame() {
 		return instance.game;
+	}
+
+	@Nonnull
+	public static HighScores getHighScores() {
+		return instance.highScores;
 	}
 }

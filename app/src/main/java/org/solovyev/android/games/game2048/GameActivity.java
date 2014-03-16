@@ -25,12 +25,16 @@ import org.andengine.entity.text.AutoWrap;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
 import org.andengine.entity.util.FPSLogger;
+import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.font.Font;
 import org.andengine.opengl.font.FontUtils;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
 import org.andengine.util.color.Color;
 import org.andengine.util.modifier.IModifier;
-import org.solovyev.android.menu.*;
+import org.solovyev.android.menu.ActivityMenu;
+import org.solovyev.android.menu.AndroidMenuHelper;
+import org.solovyev.android.menu.IdentifiableMenuItem;
+import org.solovyev.android.menu.ListActivityMenu;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -88,6 +92,9 @@ public class GameActivity extends SimpleBaseGameActivity {
 	@Nonnull
 	private Game game;
 
+	@Nonnull
+	private final HighScores highScores = App.getHighScores();
+
 	@Override
 	protected void onCreateResources() {
 		for (int i = 0; i < cellStyles.size(); i++) {
@@ -129,16 +136,25 @@ public class GameActivity extends SimpleBaseGameActivity {
 		final Font titleFont = getFonts().getFont(d.titleSize, R.color.text, appName.length(), true);
 		scene.attachChild(new Text(d.title.x, d.title.y, titleFont, appName, getVertexBufferObjectManager()));
 
-		final String score = getString(R.string.score);
 		final Font scoreFont = getFonts().getFont(d.textSize, R.color.text, 20);
-		scoreText = new Text(d.score.x, d.score.y, scoreFont, score, getVertexBufferObjectManager());
-		scoreText.setText(getString(R.string.score, game.getScore().getPoints()));
+		scoreText = new Text(d.score.x, d.score.y, scoreFont, getString(R.string.score_with_highscore), getVertexBufferObjectManager()) {
+			@Override
+			public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+				if (pSceneTouchEvent.getAction() == TouchEvent.ACTION_UP) {
+					showHighScores();
+				}
+
+				return super.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX, pTouchAreaLocalY);
+			}
+		};
+		updateScore();
 		scene.attachChild(scoreText);
+		scene.registerTouchArea(scoreText);
 
 		scene.attachChild(createBoard());
 
 		final String rules = getString(R.string.rules);
-		final Font textFont = getFonts().getFont(d.rulesSize, R.color.text,  30);
+		final Font textFont = getFonts().getFont(d.rulesSize, R.color.text, 30);
 		scene.attachChild(new Text(d.rules.x, d.rules.y, textFont, rules, new TextOptions(AutoWrap.WORDS, d.board.width()), getVertexBufferObjectManager()));
 
 		return scene;
@@ -428,7 +444,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 					public void run() {
 						final IEntity boardView = game.getBoard().getView();
 
-						scoreText.setText(getString(R.string.score, game.getScore().getPoints()));
+						updateScore();
 
 						for (CellChange.Move.Merge merge : merges) {
 							boardView.detachChild(merge.cell.getView());
@@ -447,7 +463,21 @@ public class GameActivity extends SimpleBaseGameActivity {
 		}
 	}
 
+	private void updateScore() {
+		final HighScore highestScore = highScores.getHighestScore();
+		final int scorePoints = game.getScore().getPoints();
+		if (highestScore.hasPoints()) {
+			final int highScorePoints = highestScore.getPoints();
+			scoreText.setText(getString(R.string.score_with_highscore, scorePoints, highScorePoints));
+		} else {
+			scoreText.setText(getString(R.string.score, scorePoints));
+		}
+	}
+
 	private void restartGame() {
+		if (highScores.addHighScore(game)) {
+			highScores.save(App.getPreferences());
+		}
 		game.reset();
 		restartActivity(this);
 	}
@@ -461,7 +491,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 	}
 
 	/*
-    **********************************************************************
+	**********************************************************************
     *
     *                           MENU
     *
@@ -478,6 +508,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 		if (this.menu == null) {
 			final List<IdentifiableMenuItem<MenuItem>> items = new ArrayList<IdentifiableMenuItem<MenuItem>>();
 			items.add(new RestartMenuItem());
+			items.add(new HighScoresMenuItem());
 			items.add(new ShareMenuItem());
 			this.menu = ListActivityMenu.fromResource(R.menu.menu, items, AndroidMenuHelper.getInstance());
 		}
@@ -489,10 +520,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 		return this.menu.onOptionsItemSelected(this, item);
 	}
 
-	public class RestartMenuItem implements IdentifiableMenuItem<MenuItem> {
-
-		public RestartMenuItem() {
-		}
+	private final class RestartMenuItem implements IdentifiableMenuItem<MenuItem> {
 
 		@Nonnull
 		@Override
@@ -506,10 +534,25 @@ public class GameActivity extends SimpleBaseGameActivity {
 		}
 	}
 
-	public class ShareMenuItem implements IdentifiableMenuItem<MenuItem> {
+	private final class HighScoresMenuItem implements IdentifiableMenuItem<MenuItem> {
 
-		public ShareMenuItem() {
+		@Nonnull
+		@Override
+		public Integer getItemId() {
+			return R.id.menu_high_scores;
 		}
+
+		@Override
+		public void onClick(@Nonnull MenuItem data, @Nonnull Context context) {
+			showHighScores();
+		}
+	}
+
+	private void showHighScores() {
+		startActivity(new Intent(this, HighScoresActivity.class));
+	}
+
+	private final class ShareMenuItem implements IdentifiableMenuItem<MenuItem> {
 
 		@Nonnull
 		@Override

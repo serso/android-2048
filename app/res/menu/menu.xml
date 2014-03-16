@@ -8,6 +8,11 @@
 		android:title="@string/restart" />
 
 	<item
+		android:id="@+id/menu_high_scores"
+		android:showAsAction="never"
+		android:title="@string/high_scores" />
+
+	<item
 		android:id="@+id/menu_share"
 		android:showAsAction="never"
 		android:title="@string/share" />

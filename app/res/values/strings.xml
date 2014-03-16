@@ -2,10 +2,14 @@
 <resources>
 	<string name="app_name">2048+</string>
 	<string name="score">Score: %1$d</string>
+	<string name="score_with_highscore">Score: %1$d/%2$d</string>
 	<string name="unable_to_load_game">Unable to load game</string>
 	<string name="unable_to_save_game">Unable to save game</string>
 	<string name="rules">Swipe to move the tiles. When two tiles with the same number touch, they merge into one!</string>
 	<string name="restart">Restart game</string>
 	<string name="share">Share</string>
 	<string name="share_message">I\'ve scored %1$d in 2048! Can you beat me? Try: %2$s</string>
+	<string name="high_scores">High scores</string>
+	<string name="high_score_header_date">Date</string>
+	<string name="high_score_header_score">Score</string>
 </resources>

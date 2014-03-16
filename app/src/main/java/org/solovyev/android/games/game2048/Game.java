@@ -9,8 +9,8 @@ import org.solovyev.common.text.Strings;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.solovyev.android.games.game2048.App.showToast;
@@ -28,6 +28,7 @@ public class Game {
 	private static final String JSON_BOARD = "board";
 	private static final String JSON_SCORE = "score";
 	private static final String JSON_DIFFICULTY = "difficulty";
+	private static final String JSON_START_DATE = "startDate";
 
 	@Nonnull
 	private Board board;
@@ -38,9 +39,17 @@ public class Game {
 	@Nonnull
 	private Difficulty difficulty = Difficulty.normal;
 
-	private Game(@Nonnull Board board, @Nonnull Score score) {
+	@Nonnull
+	private Date startDate;
+
+	private Game(@Nonnull Board board, @Nonnull Score score, @Nonnull Date startDate) {
 		this.board = board;
 		this.score = score;
+		this.startDate = startDate;
+	}
+
+	private Game(@Nonnull Board board, @Nonnull Score score) {
+		this(board, score, new Date());
 	}
 
 	@Nonnull
@@ -67,6 +76,16 @@ public class Game {
 	@Nonnull
 	public Score getScore() {
 		return score;
+	}
+
+	@Nonnull
+	public Date getStartDate() {
+		return startDate;
+	}
+
+	@Nonnull
+	public Difficulty getDifficulty() {
+		return difficulty;
 	}
 
 	@Nonnull
@@ -209,6 +228,7 @@ public class Game {
 			json.put(JSON_DIFFICULTY, difficulty.name());
 			json.put(JSON_BOARD, board.toJson());
 			json.put(JSON_SCORE, score.toJson());
+			json.put(JSON_START_DATE, startDate.getTime());
 			return json.toString();
 		} catch (RuntimeException e) {
 			onSaveLoadException(e, R.string.unable_to_save_game);
@@ -231,7 +251,19 @@ public class Game {
 					final Board board = Board.fromJson(json.getJSONObject(JSON_BOARD));
 					final Score score = Score.fromJson(json.getJSONObject(JSON_SCORE));
 
-					return new Game(board, score);
+					final Date startDate;
+					if (json.has(JSON_START_DATE)) {
+						final long startTime = json.getLong(JSON_START_DATE);
+						if (startTime > 0) {
+							startDate = new Date(startTime);
+						} else {
+							startDate = new Date();
+						}
+					} else {
+						startDate = new Date();
+					}
+
+					return new Game(board, score, startDate);
 				}
 			}
 		} catch (RuntimeException e) {
@@ -251,6 +283,7 @@ public class Game {
 	public void reset() {
 		this.board = newBoard(BOARD_SIZE, WITH_WALLS);
 		this.score = newScore();
+		this.startDate = new Date();
 	}
 
 	public void save(@Nonnull SharedPreferences preferences) {
