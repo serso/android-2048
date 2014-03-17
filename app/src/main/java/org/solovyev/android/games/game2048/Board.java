@@ -181,6 +181,7 @@ public class Board {
 	public static Board fromJson(@Nonnull JSONObject json) throws JSONException {
 		final int size = json.getInt(JSON_SIZE);
 		final Board board = new Board(size);
+		board.withWalls = false;
 		final String cells = json.getString(JSON_CELLS);
 
 		int i = 0;
@@ -190,6 +191,7 @@ public class Board {
 			int j = 0;
 			for (String cell : cellSplitter.split(row)) {
 				board.cells[i][j] = Cell.fromJson(cell);
+				board.withWalls |= board.cells[i][j].isWall();
 				j++;
 			}
 			i++;

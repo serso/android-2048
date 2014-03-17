@@ -4,6 +4,7 @@
 
 	<color name="bg">#fffaf8ef</color>
 	<color name="text">#776e65</color>
+	<color name="text_inverted">#ffffff</color>
 	<color name="board_bg">#ffbbada0</color>
 
 	<color name="cell_bg">#66eee4da</color>

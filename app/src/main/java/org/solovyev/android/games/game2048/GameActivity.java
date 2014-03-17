@@ -97,14 +97,19 @@ public class GameActivity extends SimpleBaseGameActivity {
 	@Nullable
 	private ActivityMenu<Menu, MenuItem> menu;
 
-	@Nonnull
+	private Scene scene;
 	private Text scoreText;
 
 	@Nonnull
 	private Game game;
 
 	@Nonnull
+	private final Object gameLock = new Object();
+
+	@Nonnull
 	private final HighScores highScores = App.getHighScores();
+
+	private IEntity gameOverView;
 
 	@Override
 	protected void onCreateResources() {
@@ -125,8 +130,13 @@ public class GameActivity extends SimpleBaseGameActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		initializing = true;
 		game = App.getGame();
-		// as game is shared between activities we need to cleanup all views attached to the objects
-		game.releaseViews();
+		synchronized (gameLock) {
+			// as game is shared between activities we need to cleanup all views attached to the objects
+			game.releaseViews();
+			scene = null;
+			scoreText = null;
+			gameOverView = null;
+		}
 
 		super.onCreate(savedInstanceState);
 		gestureDetector = new GestureDetector(this, new GestureListener());
@@ -134,7 +144,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
-		if (!animating && !initializing && isGameRunning()) {
+		if (!animating && !initializing && isGameRunning() && gameOverView == null) {
 			gestureDetector.onTouchEvent(ev);
 		}
 		return super.dispatchTouchEvent(ev);
@@ -144,7 +154,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 	protected Scene onCreateScene() {
 		this.mEngine.registerUpdateHandler(new FPSLogger());
 
-		final Scene scene = new Scene();
+		scene = new Scene();
 		scene.setBackground(new Background(getColor(R.color.bg)));
 
 		final String appName = getString(R.string.app_name);
@@ -187,6 +197,10 @@ public class GameActivity extends SimpleBaseGameActivity {
 		final Font textFont = getFonts().getFont(d.rulesSize, R.color.text, 30);
 		scene.attachChild(new Text(d.rules.x, d.rules.y, textFont, rules, new TextOptions(AutoWrap.WORDS, d.board.width()), getVertexBufferObjectManager()));
 
+		if (game.isOver()) {
+			onGameOver();
+		}
+
 		initializing = false;
 
 		return scene;
@@ -194,30 +208,32 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 	@Nonnull
 	private IEntity createBoard() {
-		final Entity boardView = new Entity(d.board.left, d.board.top);
-		final Rectangle boardRect = new Rectangle(0, 0, d.board.width(), d.board.height(), getVertexBufferObjectManager());
-		boardRect.setColor(getColor(R.color.board_bg));
-		boardView.attachChild(boardRect);
+		synchronized (gameLock) {
+			final Entity boardView = new Entity(d.board.left, d.board.top);
+			final Rectangle boardRect = new Rectangle(0, 0, d.board.width(), d.board.height(), getVertexBufferObjectManager());
+			boardRect.setColor(getColor(R.color.board_bg));
+			boardView.attachChild(boardRect);
 
-		final Board board = game.getBoard();
-		board.setView(boardView);
-		final int size = board.getSize();
-		for (int i = 0; i < size; i++) {
-			for (int j = 0; j < size; j++) {
-				boardView.attachChild(createNotValueCell(i, j));
-			}
-		}
-
-		for (int i = 0; i < size; i++) {
-			for (int j = 0; j < size; j++) {
-				final IEntity cell = createValueCell(i, j);
-				if (cell != null) {
-					boardView.attachChild(cell);
+			final Board board = game.getBoard();
+			board.setView(boardView);
+			final int size = board.getSize();
+			for (int i = 0; i < size; i++) {
+				for (int j = 0; j < size; j++) {
+					boardView.attachChild(createNotValueCell(i, j));
 				}
 			}
-		}
 
-		return boardView;
+			for (int i = 0; i < size; i++) {
+				for (int j = 0; j < size; j++) {
+					final IEntity cell = createValueCell(i, j);
+					if (cell != null) {
+						boardView.attachChild(cell);
+					}
+				}
+			}
+
+			return boardView;
+		}
 	}
 
 	@Nullable
@@ -316,6 +332,8 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 		if (!game.hasDefaultPreferences()) {
 			restartGame();
+		} else if (game.isOver()) {
+			onGameOver();
 		}
 	}
 
@@ -466,7 +484,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 			final Point from = newCellPosition(move.from.x, move.from.y);
 			final Point to = newCellPosition(move.to.x, move.to.y);
 			final IEntity cellView = move.cell.getView();
-			cellView.registerEntityModifier(new MoveModifier(0.4f, from.x, to.x, from.y, to.y, cellsAnimationListener, EaseSineInOut.getInstance()));
+			cellView.registerEntityModifier(new MoveModifier(0.2f, from.x, to.x, from.y, to.y, cellsAnimationListener, EaseSineInOut.getInstance()));
 			if (move instanceof CellChange.Move.Merge) {
 				final CellChange.Move.Merge merge = (CellChange.Move.Merge) move;
 				cellsAnimationListener.merges.add(merge);
@@ -494,30 +512,65 @@ public class GameActivity extends SimpleBaseGameActivity {
 				runOnUpdateThread(new Runnable() {
 					@Override
 					public void run() {
-						final IEntity boardView = game.getBoard().getView();
+						synchronized (gameLock) {
+							final IEntity boardView = game.getBoard().getView();
 
-						updateScore();
+							updateScore();
 
-						for (CellChange.Move.Merge merge : merges) {
-							boardView.detachChild(merge.cell.getView());
-							boardView.attachChild(createValueCell(merge.to.x, merge.to.y));
-							boardView.detachChild(merge.removedCell.getView());
+							for (CellChange.Move.Merge merge : merges) {
+								boardView.detachChild(merge.cell.getView());
+								boardView.attachChild(createValueCell(merge.to.x, merge.to.y));
+								boardView.detachChild(merge.removedCell.getView());
+							}
+
+							final List<CellChange.New> newCells = game.prepareNextTurn();
+							for (CellChange.New newCell : newCells) {
+								boardView.attachChild(createValueCell(newCell.position.x, newCell.position.y, newCell.cell));
+							}
+
+							if (game.isOver()) {
+								onGameOver();
+							}
+
+							animating = false;
 						}
-
-						final List<CellChange.New> newCells = game.prepareNextTurn();
-						for (CellChange.New newCell : newCells) {
-							boardView.attachChild(createValueCell(newCell.position.x, newCell.position.y, newCell.cell));
-						}
-
-						if (game.isOver()) {
-							showToast(R.string.game_over);
-						}
-
-						animating = false;
 					}
 				});
 			}
 		}
+	}
+
+	private void onGameOver() {
+		if(scene == null) {
+			return;
+		}
+		if (gameOverView != null) {
+			return;
+		}
+
+		gameOverView = createGameOverView();
+		scene.attachChild(gameOverView);
+	}
+
+	@Nonnull
+	private IEntity createGameOverView() {
+		final Entity gameOverView = new Entity(d.board.left, d.board.top);
+		final Rectangle gameOverRect = new Rectangle(0, 0, d.board.width(), d.board.height(), getVertexBufferObjectManager());
+		gameOverRect.setColor(getColor(R.color.board_bg));
+		gameOverRect.setAlpha(0.9f);
+		gameOverView.attachChild(gameOverRect);
+
+		final String gameOver = getString(R.string.game_over);
+		final Font gameOverFont = getFonts().getFont(d.titleSize, R.color.text_inverted, gameOver.length(), true);
+		final float textWidth = FontUtils.measureText(gameOverFont, gameOver);
+		final float textHeight = gameOverFont.getLineHeight();
+
+		final float x = d.board.width() / 2 - textWidth / 2;
+		final float y = d.board.height() / 2 - textHeight / 2;
+		final Text gameOverText = new Text(x, y, gameOverFont, gameOver, getVertexBufferObjectManager());
+		gameOverView.attachChild(gameOverText);
+
+		return gameOverView;
 	}
 
 	private void updateScore() {
@@ -532,10 +585,12 @@ public class GameActivity extends SimpleBaseGameActivity {
 	}
 
 	private void restartGame() {
-		if (highScores.addHighScore(game)) {
-			highScores.save(App.getPreferences());
+		synchronized (gameLock) {
+			if (highScores.addHighScore(game)) {
+				highScores.save(App.getPreferences());
+			}
+			game.reset();
 		}
-		game.reset();
 		restartActivity(this);
 	}
 
