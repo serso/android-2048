@@ -31,6 +31,7 @@ import org.andengine.opengl.font.FontUtils;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
 import org.andengine.util.color.Color;
 import org.andengine.util.modifier.IModifier;
+import org.andengine.util.modifier.ease.EaseSineInOut;
 import org.solovyev.android.menu.ActivityMenu;
 import org.solovyev.android.menu.AndroidMenuHelper;
 import org.solovyev.android.menu.IdentifiableMenuItem;
@@ -442,7 +443,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 			final Point from = newCellPosition(move.from.x, move.from.y);
 			final Point to = newCellPosition(move.to.x, move.to.y);
 			final IEntity cellView = move.cell.getView();
-			cellView.registerEntityModifier(new MoveModifier(0.2f, from.x, to.x, from.y, to.y, cellsAnimationListener));
+			cellView.registerEntityModifier(new MoveModifier(0.4f, from.x, to.x, from.y, to.y, cellsAnimationListener, EaseSineInOut.getInstance()));
 			if (move instanceof CellChange.Move.Merge) {
 				final CellChange.Move.Merge merge = (CellChange.Move.Merge) move;
 				cellsAnimationListener.merges.add(merge);
