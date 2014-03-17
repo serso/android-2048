@@ -82,6 +82,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 	private GestureDetector gestureDetector;
 
 	private boolean animating = false;
+	private boolean initializing = true;
 
 	@Nullable
 	private ActivityMenu<Menu, MenuItem> menu;
@@ -109,6 +110,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		initializing = true;
 		game = App.getGame();
 		// as game is shared between activities we need to cleanup all views attached to the objects
 		game.releaseViews();
@@ -119,7 +121,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
-		if (!animating && isGameRunning()) {
+		if (!animating && !initializing && isGameRunning()) {
 			gestureDetector.onTouchEvent(ev);
 		}
 		return super.dispatchTouchEvent(ev);
@@ -156,6 +158,8 @@ public class GameActivity extends SimpleBaseGameActivity {
 		final String rules = getString(R.string.rules);
 		final Font textFont = getFonts().getFont(d.rulesSize, R.color.text, 30);
 		scene.attachChild(new Text(d.rules.x, d.rules.y, textFont, rules, new TextOptions(AutoWrap.WORDS, d.board.width()), getVertexBufferObjectManager()));
+
+		initializing = false;
 
 		return scene;
 	}
@@ -407,6 +411,10 @@ public class GameActivity extends SimpleBaseGameActivity {
 	}
 
 	private void go(@Nonnull Direction direction) {
+		if (animating) {
+			return;
+		}
+
 		final CellsAnimationListener cellsAnimationListener = new CellsAnimationListener();
 
 		final List<CellChange.Move> moves = game.go(direction);

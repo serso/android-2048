@@ -1,9 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
 	<style name="AppTheme" parent="android:Theme.Holo.NoActionBar">
 		<item name="android:windowBackground">@color/bg</item>
 	</style>
 
-	<style name="AppTheme.Dialog" parent="android:Theme.Holo.Dialog"/>
+	<style name="AppTheme.Dialog" parent="android:Theme.Holo.Dialog" />
+	<style name="AppTheme.Dialog.NoActionBar" parent="android:Theme.Holo.Dialog.NoActionBar" />
+
+	<style name="HighScoreListItemSeparator">
+		<item name="android:layout_width">1px</item>
+		<item name="android:layout_height">match_parent</item>
+		<item name="android:layout_marginTop">10dp</item>
+		<item name="android:layout_marginBottom">10dp</item>
+		<item name="android:background">@color/white</item>
+	</style>
+
+	<style name="HighScoreListItemDate">
+		<item name="android:layout_width">0dp</item>
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:layout_weight">2</item>
+		<item name="android:gravity">center_horizontal</item>
+		<item name="android:singleLine">true</item>
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+		<item name="android:textColor">?android:attr/textColorPrimary</item>
+	</style>
+
+	<style name="HighScoreListItemScore">
+		<item name="android:layout_width">0dp</item>
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:layout_weight">1</item>
+		<item name="android:gravity">center_horizontal</item>
+		<item name="android:singleLine">true</item>
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+		<item name="android:textColor">?android:attr/textColorPrimary</item>
+	</style>
+
+	<style name="HighScoreListItem">
+		<item name="android:orientation">horizontal</item>
+		<item name="android:layout_width">match_parent</item>
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:minHeight">?android:attr/listPreferredItemHeight</item>
+		<item name="android:gravity">center_vertical</item>
+
+		<item name="android:paddingStart">8dp</item>
+		<item name="android:paddingLeft">8dp</item>
+
+		<item name="android:paddingEnd">?android:attr/scrollbarSize</item>
+		<item name="android:paddingRight">?android:attr/scrollbarSize</item>
+	</style>
 
 </resources>

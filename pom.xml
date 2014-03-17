@@ -184,6 +184,13 @@
 
 			<dependency>
 				<groupId>org.solovyev.android</groupId>
+				<artifactId>android-common-core</artifactId>
+				<version>${acl.version}</version>
+				<type>apklib</type>
+			</dependency>
+
+			<dependency>
+				<groupId>org.solovyev.android</groupId>
 				<artifactId>android-common-views</artifactId>
 				<version>${acl.version}</version>
 				<type>apklib</type>

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+	<color name="white">#ffffff</color>
+
 	<color name="bg">#fffaf8ef</color>
 	<color name="text">#776e65</color>
 	<color name="board_bg">#ffbbada0</color>
