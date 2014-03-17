@@ -21,6 +21,7 @@ import org.andengine.entity.modifier.ScaleModifier;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
+import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.AutoWrap;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
@@ -28,6 +29,9 @@ import org.andengine.entity.util.FPSLogger;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.font.Font;
 import org.andengine.opengl.font.FontUtils;
+import org.andengine.opengl.texture.TextureOptions;
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
+import org.andengine.opengl.texture.region.TextureRegion;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
 import org.andengine.util.color.Color;
 import org.andengine.util.modifier.IModifier;
@@ -45,6 +49,7 @@ import java.util.List;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static org.andengine.engine.options.ScreenOrientation.PORTRAIT_FIXED;
+import static org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory.createFromAsset;
 import static org.andengine.util.HorizontalAlign.CENTER;
 import static org.solovyev.android.Activities.restartActivity;
 import static org.solovyev.android.games.game2048.CellStyle.newCellStyle;
@@ -80,6 +85,9 @@ public class GameActivity extends SimpleBaseGameActivity {
 	private final Fonts fonts = new Fonts(this);
 
 	@Nonnull
+	private TextureRegion preferencesButtonTexture;
+
+	@Nonnull
 	private GestureDetector gestureDetector;
 
 	private boolean animating = false;
@@ -102,6 +110,9 @@ public class GameActivity extends SimpleBaseGameActivity {
 		for (int i = 0; i < cellStyles.size(); i++) {
 			cellStyles.valueAt(i).loadFont(this, d.cellTextSize);
 		}
+		final BitmapTextureAtlas bitmapTextureAtlas = new BitmapTextureAtlas(getTextureManager(), 128, 128, TextureOptions.BILINEAR);
+		preferencesButtonTexture = createFromAsset(bitmapTextureAtlas, this, "preferences-icon.png", 0, 0);
+		bitmapTextureAtlas.load();
 	}
 
 	@Nonnull
@@ -137,17 +148,22 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 		final String appName = getString(R.string.app_name);
 		final Font titleFont = getFonts().getFont(d.titleSize, R.color.text, appName.length(), true);
-		final Text titleText = new Text(d.title.x, d.title.y, titleFont, appName, getVertexBufferObjectManager()) {
+		final Text titleText = new Text(d.title.x, d.title.y, titleFont, appName, getVertexBufferObjectManager());
+		scene.attachChild(titleText);
+
+		final Sprite preferencesButton = new Sprite(d.button.x, d.button.y, preferencesButtonTexture, this.getVertexBufferObjectManager()) {
 			@Override
-			public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+			public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
 				if (pSceneTouchEvent.getAction() == TouchEvent.ACTION_UP) {
 					showPreferences();
 				}
 
-				return super.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX, pTouchAreaLocalY);
+				return true;
 			}
 		};
-		scene.attachChild(titleText);
+		preferencesButton.setSize(d.buttonSize, d.buttonSize);
+		scene.attachChild(preferencesButton);
+		scene.registerTouchArea(preferencesButton);
 
 		final Font scoreFont = getFonts().getFont(d.textSize, R.color.text, 20);
 		scoreText = new Text(d.score.x, d.score.y, scoreFont, getString(R.string.score_with_highscore), getVertexBufferObjectManager()) {
@@ -157,13 +173,12 @@ public class GameActivity extends SimpleBaseGameActivity {
 					showHighScores();
 				}
 
-				return super.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX, pTouchAreaLocalY);
+				return true;
 			}
 		};
 		updateScore();
 		scene.attachChild(scoreText);
 		scene.registerTouchArea(scoreText);
-		scene.registerTouchArea(titleText);
 
 		scene.attachChild(createBoard());
 
@@ -306,9 +321,12 @@ public class GameActivity extends SimpleBaseGameActivity {
 	private static final class Dimensions {
 
 		private float titleSize;
+		private float buttonSize;
+		private float buttonPadding;
 		private float textSize;
 		private float rulesSize;
 		private Point title = new Point();
+		private Point button = new Point();
 		private Point score = new Point();
 		private Point rules = new Point();
 		private float padding;
@@ -328,11 +346,14 @@ public class GameActivity extends SimpleBaseGameActivity {
 			width = min(displaySize.x, displaySize.y);
 			height = max(displaySize.x, displaySize.y);
 			titleSize = 0.08f * height;
+			buttonPadding = titleSize / 10f;
+			buttonSize = titleSize - 2 * buttonPadding;
 			textSize = titleSize / 2;
 			rulesSize = textSize * 3 / 4;
 			padding = titleSize;
 			textPadding = textSize;
 			title.y = (int) textPadding;
+			button.y = (int) (title.y + 2 * buttonPadding);
 			score.y = (int) (title.y + textPadding + titleSize);
 			calculateBoard();
 			final int size = game.getBoard().getSize();
@@ -340,6 +361,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 			cellSize = (board.width() - (size + 1) * cellPadding) / size;
 			cellTextSize = cellSize * 2 / 3;
 			title.x = board.left;
+			button.x = (int) (board.right - buttonSize);
 			score.x = board.left;
 			rules.x = board.left;
 			rules.y = (int) (board.bottom + textPadding);
