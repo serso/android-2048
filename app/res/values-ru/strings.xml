@@ -17,4 +17,5 @@
 	<string name="difficulty_hard">Сложная</string>
 	<string name="with_walls">Со стенами</string>
 	<string name="size">Размер поля</string>
+	<string name="game_over">Конец игры</string>
 </resources>

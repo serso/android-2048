@@ -25,4 +25,5 @@
 	<string name="field_size_7">7x7</string>
 	<string name="field_size_8">8x8</string>
 	<string name="field_size_9">9x9</string>
+	<string name="game_over">Game over</string>
 </resources>

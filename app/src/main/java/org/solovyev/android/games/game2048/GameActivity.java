@@ -52,6 +52,7 @@ import static org.andengine.engine.options.ScreenOrientation.PORTRAIT_FIXED;
 import static org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory.createFromAsset;
 import static org.andengine.util.HorizontalAlign.CENTER;
 import static org.solovyev.android.Activities.restartActivity;
+import static org.solovyev.android.games.game2048.App.showToast;
 import static org.solovyev.android.games.game2048.CellStyle.newCellStyle;
 
 public class GameActivity extends SimpleBaseGameActivity {
@@ -90,8 +91,8 @@ public class GameActivity extends SimpleBaseGameActivity {
 	@Nonnull
 	private GestureDetector gestureDetector;
 
-	private boolean animating = false;
-	private boolean initializing = true;
+	private volatile boolean animating = false;
+	private volatile boolean initializing = true;
 
 	@Nullable
 	private ActivityMenu<Menu, MenuItem> menu;
@@ -507,9 +508,14 @@ public class GameActivity extends SimpleBaseGameActivity {
 						for (CellChange.New newCell : newCells) {
 							boardView.attachChild(createValueCell(newCell.position.x, newCell.position.y, newCell.cell));
 						}
+
+						if (game.isOver()) {
+							showToast(R.string.game_over);
+						}
+
+						animating = false;
 					}
 				});
-				animating = false;
 			}
 		}
 	}

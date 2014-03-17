@@ -301,6 +301,59 @@ public class Game {
 		this.difficulty = preferences.difficulty;
 	}
 
+	public boolean isOver() {
+		final Cell[][] cells = board.cells;
+
+		for (int i = 0; i < cells.length; i++) {
+			for (int j = 0; j < cells[i].length; j++) {
+				if (canMove(i, j, cells)) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	private boolean canMove(int i, int j, @Nonnull Cell[][] cells) {
+		final Cell cell = cells[i][j];
+		if (cell.isEmpty()) {
+			return true;
+		} else if (cell.isWall()) {
+			return false;
+		} else {
+			if (i < board.size - 1) {
+				final Cell adjacentCell = cells[i + 1][j];
+				if (adjacentCell.isEmpty() || adjacentCell.getValue() == cell.getValue()) {
+					return true;
+				}
+			}
+
+			if (i > 0) {
+				final Cell adjacentCell = cells[i - 1][j];
+				if (adjacentCell.isEmpty() || adjacentCell.getValue() == cell.getValue()) {
+					return true;
+				}
+			}
+
+			if (j < board.size - 1) {
+				final Cell adjacentCell = cells[i][j + 1];
+				if (adjacentCell.isEmpty() || adjacentCell.getValue() == cell.getValue()) {
+					return true;
+				}
+			}
+
+			if (j > 0) {
+				final Cell adjacentCell = cells[i][j - 1];
+				if (adjacentCell.isEmpty() || adjacentCell.getValue() == cell.getValue()) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+	}
+
 	public void save(@Nonnull SharedPreferences preferences) {
 		state.putPreference(preferences, toJson());
 	}
