@@ -33,6 +33,7 @@
 		</activity>
 
 		<activity android:label="@string/high_scores" android:name=".HighScoresActivity" android:theme="@style/AppTheme.Dialog"/>
+		<activity android:label="@string/preferences" android:name=".PreferencesActivity" android:theme="@style/AppTheme.Dialog"/>
 
 	</application>
 </manifest>

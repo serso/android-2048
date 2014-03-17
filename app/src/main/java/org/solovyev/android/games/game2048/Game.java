@@ -22,9 +22,6 @@ public class Game {
 	@Nonnull
 	private static final StringPreference<String> state = StringPreference.of("state", null);
 
-	private static final int BOARD_SIZE = 6;
-	private static final boolean WITH_WALLS = true;
-
 	private static final String JSON_BOARD = "board";
 	private static final String JSON_SCORE = "score";
 	private static final String JSON_DIFFICULTY = "difficulty";
@@ -37,24 +34,26 @@ public class Game {
 	private Score score;
 
 	@Nonnull
-	private Difficulty difficulty = Difficulty.normal;
+	private Difficulty difficulty;
 
 	@Nonnull
 	private Date startDate;
 
-	private Game(@Nonnull Board board, @Nonnull Score score, @Nonnull Date startDate) {
+	private Game(@Nonnull Board board, @Nonnull Score score, @Nonnull Date startDate, @Nonnull Difficulty difficulty) {
 		this.board = board;
 		this.score = score;
 		this.startDate = startDate;
+		this.difficulty = difficulty;
 	}
 
-	private Game(@Nonnull Board board, @Nonnull Score score) {
-		this(board, score, new Date());
+	private Game(@Nonnull Board board, @Nonnull Score score, @Nonnull Difficulty difficulty) {
+		this(board, score, new Date(), difficulty);
 	}
 
 	@Nonnull
 	private static Game newGame() {
-		return new Game(newBoard(BOARD_SIZE, WITH_WALLS), newScore());
+		final GamePreferences preferences = GamePreferences.getDefault();
+		return new Game(Board.newBoard(preferences.size, preferences.withWalls), newScore(), preferences.difficulty);
 	}
 
 	@Nonnull
@@ -263,7 +262,7 @@ public class Game {
 						startDate = new Date();
 					}
 
-					return new Game(board, score, startDate);
+					return new Game(board, score, startDate, difficulty);
 				}
 			}
 		} catch (RuntimeException e) {
@@ -280,10 +279,26 @@ public class Game {
 		Log.e(App.TAG, e.getMessage(), e);
 	}
 
+	public boolean hasDefaultPreferences() {
+		final GamePreferences preferences = GamePreferences.getDefault();
+		if(preferences.difficulty == this.difficulty) {
+			if(preferences.size == this.board.size) {
+				if(preferences.withWalls == this.board.withWalls) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
 	public void reset() {
-		this.board = newBoard(BOARD_SIZE, WITH_WALLS);
+		final GamePreferences preferences = GamePreferences.getDefault();
+
+		this.board = newBoard(preferences.size, preferences.withWalls);
 		this.score = newScore();
 		this.startDate = new Date();
+		this.difficulty = preferences.difficulty;
 	}
 
 	public void save(@Nonnull SharedPreferences preferences) {

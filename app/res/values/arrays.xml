@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<array name="difficulty_keys">
+		<item>easy</item>
+		<item>normal</item>
+		<item>hard</item>
+	</array>
+
+	<array name="difficulty_names">
+		<item>@string/difficulty_easy</item>
+		<item>@string/difficulty_normal</item>
+		<item>@string/difficulty_hard</item>
+	</array>
+
+	<array name="field_size_keys">
+		<item>"4"</item>
+		<item>"5"</item>
+		<item>"6"</item>
+		<item>"7"</item>
+		<item>"8"</item>
+		<item>"9"</item>
+	</array>
+
+	<array name="field_size_names">
+		<item>@string/field_size_4</item>
+		<item>@string/field_size_5</item>
+		<item>@string/field_size_6</item>
+		<item>@string/field_size_7</item>
+		<item>@string/field_size_8</item>
+		<item>@string/field_size_9</item>
+	</array>
+</resources>

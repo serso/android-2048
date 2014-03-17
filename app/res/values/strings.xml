@@ -12,4 +12,17 @@
 	<string name="high_scores">High scores</string>
 	<string name="high_score_header_date">Date</string>
 	<string name="high_score_header_score">Score</string>
+	<string name="preferences">Preferences</string>
+	<string name="difficulty">Difficulty</string>
+	<string name="difficulty_easy">Easy</string>
+	<string name="difficulty_normal">Normal</string>
+	<string name="difficulty_hard">Hard</string>
+	<string name="with_walls">With walls</string>
+	<string name="size">Field size</string>
+	<string name="field_size_4">4x4</string>
+	<string name="field_size_5">5x5</string>
+	<string name="field_size_6">6x6</string>
+	<string name="field_size_7">7x7</string>
+	<string name="field_size_8">8x8</string>
+	<string name="field_size_9">9x9</string>
 </resources>

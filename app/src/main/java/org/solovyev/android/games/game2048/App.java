@@ -43,6 +43,7 @@ public final class App {
 	private void init0(@Nonnull Application application) {
 		this.application = application;
 		this.preferences = getDefaultSharedPreferences(application);
+		GamePreferences.applyDefaultValues(this.preferences);
 		this.uiHandler = Threads.newUiHandler();
 		this.game = Game.newFromSave(this.preferences);
 		this.highScores = HighScores.newFromPreferences(this.preferences);

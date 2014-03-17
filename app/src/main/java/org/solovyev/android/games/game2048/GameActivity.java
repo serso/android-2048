@@ -136,7 +136,17 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 		final String appName = getString(R.string.app_name);
 		final Font titleFont = getFonts().getFont(d.titleSize, R.color.text, appName.length(), true);
-		scene.attachChild(new Text(d.title.x, d.title.y, titleFont, appName, getVertexBufferObjectManager()));
+		final Text titleText = new Text(d.title.x, d.title.y, titleFont, appName, getVertexBufferObjectManager()) {
+			@Override
+			public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+				if (pSceneTouchEvent.getAction() == TouchEvent.ACTION_UP) {
+					showPreferences();
+				}
+
+				return super.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX, pTouchAreaLocalY);
+			}
+		};
+		scene.attachChild(titleText);
 
 		final Font scoreFont = getFonts().getFont(d.textSize, R.color.text, 20);
 		scoreText = new Text(d.score.x, d.score.y, scoreFont, getString(R.string.score_with_highscore), getVertexBufferObjectManager()) {
@@ -152,6 +162,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 		updateScore();
 		scene.attachChild(scoreText);
 		scene.registerTouchArea(scoreText);
+		scene.registerTouchArea(titleText);
 
 		scene.attachChild(createBoard());
 
@@ -280,6 +291,15 @@ public class GameActivity extends SimpleBaseGameActivity {
 	protected void onPause() {
 		game.save(App.getPreferences());
 		super.onPause();
+	}
+
+	@Override
+	protected synchronized void onResume() {
+		super.onResume();
+
+		if (!game.hasDefaultPreferences()) {
+			restartGame();
+		}
 	}
 
 	private static final class Dimensions {
@@ -498,6 +518,14 @@ public class GameActivity extends SimpleBaseGameActivity {
 		startActivity(shareIntent);
 	}
 
+	private void showHighScores() {
+		startActivity(new Intent(this, HighScoresActivity.class));
+	}
+
+	private void showPreferences() {
+		startActivity(new Intent(this, PreferencesActivity.class));
+	}
+
 	/*
 	**********************************************************************
     *
@@ -517,6 +545,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 			final List<IdentifiableMenuItem<MenuItem>> items = new ArrayList<IdentifiableMenuItem<MenuItem>>();
 			items.add(new RestartMenuItem());
 			items.add(new HighScoresMenuItem());
+			items.add(new PreferencesMenuItem());
 			items.add(new ShareMenuItem());
 			this.menu = ListActivityMenu.fromResource(R.menu.menu, items, AndroidMenuHelper.getInstance());
 		}
@@ -556,8 +585,18 @@ public class GameActivity extends SimpleBaseGameActivity {
 		}
 	}
 
-	private void showHighScores() {
-		startActivity(new Intent(this, HighScoresActivity.class));
+	private final class PreferencesMenuItem implements IdentifiableMenuItem<MenuItem> {
+
+		@Nonnull
+		@Override
+		public Integer getItemId() {
+			return R.id.menu_preferences;
+		}
+
+		@Override
+		public void onClick(@Nonnull MenuItem data, @Nonnull Context context) {
+			showPreferences();
+		}
 	}
 
 	private final class ShareMenuItem implements IdentifiableMenuItem<MenuItem> {

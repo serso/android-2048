@@ -10,4 +10,11 @@
 	<string name="share">Поделиться</string>
 	<string name="share_message">Я набрал %1$d очков в 2048! Можешь побить мой рекорд? Попробуй: %2$s</string>
 	<string name="high_scores">Рекорды</string>
+	<string name="preferences">Настройки</string>
+	<string name="difficulty">Сложность</string>
+	<string name="difficulty_easy">Простая</string>
+	<string name="difficulty_normal">Средняя</string>
+	<string name="difficulty_hard">Сложная</string>
+	<string name="with_walls">Со стенами</string>
+	<string name="size">Размер поля</string>
 </resources>
