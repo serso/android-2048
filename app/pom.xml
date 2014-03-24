@@ -22,13 +22,13 @@
 	<parent>
 		<groupId>org.solovyev.android.games.game2048</groupId>
 		<artifactId>android-game2048</artifactId>
-		<version>0.03</version>
+		<version>0.04</version>
 	</parent>
 
 	<packaging>apk</packaging>
 
 	<artifactId>android-game2048-app</artifactId>
-	<version>0.03</version>
+	<version>0.04</version>
 
 	<name>Android 2048 Game App</name>
 
