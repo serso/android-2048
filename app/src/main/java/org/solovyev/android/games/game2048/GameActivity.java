@@ -202,7 +202,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 		scene.attachChild(createBoard());
 
 		final String rules = getString(R.string.rules);
-		final Font rulesFont = getFonts().getFont(d.rulesSize, R.color.text, 40);
+		final Font rulesFont = getFonts().getFont(d.rulesSize, R.color.text, 10);
 		scene.attachChild(new Text(d.rules.x, d.rules.y, rulesFont, rules, 1024, new TextOptions(AutoWrap.WORDS, d.board.width()), getVertexBufferObjectManager()));
 
 		if (game.isOver()) {
