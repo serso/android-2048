@@ -52,7 +52,6 @@ import static org.andengine.engine.options.ScreenOrientation.PORTRAIT_FIXED;
 import static org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory.createFromAsset;
 import static org.andengine.util.HorizontalAlign.CENTER;
 import static org.solovyev.android.Activities.restartActivity;
-import static org.solovyev.android.games.game2048.App.showToast;
 import static org.solovyev.android.games.game2048.CellStyle.newCellStyle;
 
 public class GameActivity extends SimpleBaseGameActivity {
@@ -89,6 +88,12 @@ public class GameActivity extends SimpleBaseGameActivity {
 	private TextureRegion preferencesButtonTexture;
 
 	@Nonnull
+	private TextureRegion shareButtonTexture;
+
+	@Nonnull
+	private TextureRegion restartButtonTexture;
+
+	@Nonnull
 	private GestureDetector gestureDetector;
 
 	private volatile boolean animating = false;
@@ -116,9 +121,17 @@ public class GameActivity extends SimpleBaseGameActivity {
 		for (int i = 0; i < cellStyles.size(); i++) {
 			cellStyles.valueAt(i).loadFont(this, d.cellTextSize);
 		}
+		preferencesButtonTexture = loadTexture("preferences-icon.png");
+		shareButtonTexture = loadTexture("share-icon.png");
+		restartButtonTexture = loadTexture("restart-icon.png");
+	}
+
+	@Nonnull
+	private TextureRegion loadTexture(@Nonnull String name) {
 		final BitmapTextureAtlas bitmapTextureAtlas = new BitmapTextureAtlas(getTextureManager(), 128, 128, TextureOptions.BILINEAR);
-		preferencesButtonTexture = createFromAsset(bitmapTextureAtlas, this, "preferences-icon.png", 0, 0);
+		final TextureRegion texture = createFromAsset(bitmapTextureAtlas, this, name, 0, 0);
 		bitmapTextureAtlas.load();
+		return texture;
 	}
 
 	@Nonnull
@@ -162,22 +175,17 @@ public class GameActivity extends SimpleBaseGameActivity {
 		final Text titleText = new Text(d.title.x, d.title.y, titleFont, appName, getVertexBufferObjectManager());
 		scene.attachChild(titleText);
 
-		final Sprite preferencesButton = new Sprite(d.button.x, d.button.y, preferencesButtonTexture, this.getVertexBufferObjectManager()) {
+		final Sprite preferencesButton = createButton(d.button.x, d.button.y, preferencesButtonTexture, new Runnable() {
 			@Override
-			public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-				if (pSceneTouchEvent.getAction() == TouchEvent.ACTION_UP) {
-					showPreferences();
-				}
-
-				return true;
+			public void run() {
+				showPreferences();
 			}
-		};
-		preferencesButton.setSize(d.buttonSize, d.buttonSize);
+		});
 		scene.attachChild(preferencesButton);
 		scene.registerTouchArea(preferencesButton);
 
 		final Font scoreFont = getFonts().getFont(d.textSize, R.color.text, 20);
-		scoreText = new Text(d.score.x, d.score.y, scoreFont, getString(R.string.score_with_highscore), getVertexBufferObjectManager()) {
+		scoreText = new Text(d.score.x, d.score.y, scoreFont, getString(R.string.score_with_highscore), 40, getVertexBufferObjectManager()) {
 			@Override
 			public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
 				if (pSceneTouchEvent.getAction() == TouchEvent.ACTION_UP) {
@@ -194,8 +202,8 @@ public class GameActivity extends SimpleBaseGameActivity {
 		scene.attachChild(createBoard());
 
 		final String rules = getString(R.string.rules);
-		final Font textFont = getFonts().getFont(d.rulesSize, R.color.text, 30);
-		scene.attachChild(new Text(d.rules.x, d.rules.y, textFont, rules, new TextOptions(AutoWrap.WORDS, d.board.width()), getVertexBufferObjectManager()));
+		final Font rulesFont = getFonts().getFont(d.rulesSize, R.color.text, 40);
+		scene.attachChild(new Text(d.rules.x, d.rules.y, rulesFont, rules, 1024, new TextOptions(AutoWrap.WORDS, d.board.width()), getVertexBufferObjectManager()));
 
 		if (game.isOver()) {
 			onGameOver();
@@ -204,6 +212,22 @@ public class GameActivity extends SimpleBaseGameActivity {
 		initializing = false;
 
 		return scene;
+	}
+
+	@Nonnull
+	private Sprite createButton(final float x, final float y, @Nonnull final TextureRegion texture, @Nonnull final Runnable runnable) {
+		final Sprite button = new Sprite(x, y, texture, this.getVertexBufferObjectManager()) {
+			@Override
+			public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+				if (pSceneTouchEvent.getAction() == TouchEvent.ACTION_UP) {
+					runnable.run();
+				}
+
+				return true;
+			}
+		};
+		button.setSize(d.buttonSize, d.buttonSize);
+		return button;
 	}
 
 	@Nonnull
@@ -420,6 +444,10 @@ public class GameActivity extends SimpleBaseGameActivity {
 		private final int swipeMaxOffPath = Integer.MAX_VALUE;
 
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float xVelocity, float yVelocity) {
+			if (e1 == null || e2 == null) {
+				return false;
+			}
+
 			final float xDiff = e2.getX() - e1.getX();
 			final float yDiff = e2.getY() - e1.getY();
 			if (Math.abs(xDiff) > swipeMaxOffPath && Math.abs(yDiff) > swipeMaxOffPath) {
@@ -541,7 +569,7 @@ public class GameActivity extends SimpleBaseGameActivity {
 	}
 
 	private void onGameOver() {
-		if(scene == null) {
+		if (scene == null) {
 			return;
 		}
 		if (gameOverView != null) {
@@ -560,17 +588,54 @@ public class GameActivity extends SimpleBaseGameActivity {
 		gameOverRect.setAlpha(0.9f);
 		gameOverView.attachChild(gameOverRect);
 
+		final Text gameOverLabel = createGameOverLabel();
+		gameOverView.attachChild(gameOverLabel);
+
+		final Sprite gameOverRestartButton = createGameOverRestartButton(gameOverLabel);
+		gameOverView.attachChild(gameOverRestartButton);
+		scene.registerTouchArea(gameOverRestartButton);
+
+		final Sprite gameOverShareButton = createGameOverShareButton(gameOverLabel);
+		gameOverView.attachChild(gameOverShareButton);
+		scene.registerTouchArea(gameOverShareButton);
+
+		return gameOverView;
+	}
+
+	@Nonnull
+	private Sprite createGameOverShareButton(@Nonnull Text gameOverLabel) {
+		final float x = 3 * d.board.width() / 4 - d.buttonSize / 2;
+		final float y = gameOverLabel.getY() + gameOverLabel.getHeight() + d.textPadding;
+		return createButton(x, y, shareButtonTexture, new Runnable() {
+			@Override
+			public void run() {
+				shareScore();
+			}
+		});
+	}
+
+	@Nonnull
+	private Sprite createGameOverRestartButton(@Nonnull Text gameOverLabel) {
+		final float x = d.board.width() / 4 - d.buttonSize / 2;
+		final float y = gameOverLabel.getY() + gameOverLabel.getHeight() + d.textPadding;
+		return createButton(x, y, restartButtonTexture, new Runnable() {
+			@Override
+			public void run() {
+				restartGame();
+			}
+		});
+	}
+
+	@Nonnull
+	private Text createGameOverLabel() {
 		final String gameOver = getString(R.string.game_over);
 		final Font gameOverFont = getFonts().getFont(d.titleSize, R.color.text_inverted, gameOver.length(), true);
 		final float textWidth = FontUtils.measureText(gameOverFont, gameOver);
 		final float textHeight = gameOverFont.getLineHeight();
 
 		final float x = d.board.width() / 2 - textWidth / 2;
-		final float y = d.board.height() / 2 - textHeight / 2;
-		final Text gameOverText = new Text(x, y, gameOverFont, gameOver, getVertexBufferObjectManager());
-		gameOverView.attachChild(gameOverText);
-
-		return gameOverView;
+		final float y = d.board.height() / 2 - textHeight - d.textPadding / 2;
+		return new Text(x, y, gameOverFont, gameOver, getVertexBufferObjectManager());
 	}
 
 	private void updateScore() {
